@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Upload OK</title>
+    <style>
+        body { font-family: '맑은 고딕', sans-serif; }
+        a { text-decoration:none; color:#1a5fb4; }
+        h1 { font-size:24px; }
+
+        table.view {
+            width: 700px;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        table.view th, table.view td {
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            font-size: 14px;
+            text-align: left;
+        }
+        table.view th {
+            width: 110px;
+            background: #F5F5F5;
+            text-align: center;
+            white-space: nowrap;
+        }
+        table.view td {
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+<center>
+    <h1>업로드 완료</h1>
+
+    <table class='view'>
+        <tr><th>제목</th><td>{{ row.title }}</td></tr>
+        <tr><th>원본 파일</th><td>{{ row.orgfile }}</td></tr>
+        <tr><th>저장 경로</th><td>{{ row.file.name }}</td></tr>
+        <tr><th>크기</th><td>{{ row.filesize|filesizeformat }}</td></tr>
+        <tr><th>등록일</th><td>{{ row.rdate|date:"Y-m-d H:i" }}</td></tr>
+        <tr><th>링크</th>
+            <td><a href='{{ row.file.url }}' target='_blank'>{{ row.orgfile }}</a> &nbsp;(새 창에서 열기)</td>
+        </tr>
+    </table>
+
+    <br/>
+    <a href='../'>다시 업로드</a> &nbsp;&nbsp;&nbsp;
+    <a href='../list/'>파일리스트</a> &nbsp;&nbsp;&nbsp;
+    <a href='../../'>홈</a>
+</center>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>재고 현황 | AI SMART WAREHOUSE</title>
+  <style>
+    :root { --bg:#0b111e; --panel:#131b2e; --border:#1e293b; --text:#e2e8f0; --muted:#94a3b8; --blue:#38bdf8; --green:#22c55e; --orange:#f97316; --red:#ef4444; }
+    * { box-sizing:border-box; } body { margin:0; min-height:100vh; padding:24px; background:radial-gradient(circle at 50% 0%, #172b40 0, var(--bg) 42%); color:var(--text); font:13px "Segoe UI", sans-serif; }
+    .wrap { max-width:1100px; margin:auto; } .top { display:flex; justify-content:space-between; align-items:end; margin-bottom:22px; } .eyebrow { color:var(--blue); font-size:10px; letter-spacing:1.5px; font-weight:700; } h1 { margin:7px 0 4px; font-size:24px; } .muted { color:var(--muted); font-size:12px; }
+    .actions { display:flex; gap:8px; } a { border-radius:4px; padding:10px 13px; background:#0284c7; color:#fff; font-weight:600; text-decoration:none; } a.secondary { background:#1e293b; color:var(--muted); }
+    .summary { display:flex; gap:12px; margin-bottom:12px; } .card { padding:16px; background:rgba(19,27,46,.96); border:1px solid var(--border); border-radius:6px; } .label { color:var(--muted); font-size:11px; } .value { margin-top:8px; font-size:24px; font-weight:700; }
+    .table-card { overflow:auto; } table { width:100%; border-collapse:collapse; min-width:760px; } th, td { padding:12px 10px; border-bottom:1px solid var(--border); text-align:left; font-size:12px; } th { color:var(--muted); font-weight:500; } .status { font-weight:700; } .normal { color:var(--green); } .warning { color:var(--orange); } .shortage { color:var(--red); }
+    @media (max-width:650px) { body { padding:16px; } .top { display:block; } .actions { margin-top:16px; flex-wrap:wrap; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top"><div><div class="eyebrow">AI SMART WAREHOUSE / STOCK STATUS</div><h1>재고 현황</h1><div class="muted">robotapp_inventory의 현재 물품 재고와 보관 위치입니다.</div></div><div class="actions"><a href="{% url 'robotapp:item_create' %}">물품 등록</a><a class="secondary" href="{% url 'robotapp:index' %}">대시보드</a></div></div>
+    <section class="summary"><div class="card"><div class="label">총 재고 수량</div><div class="value">{{ total_stock }}개</div></div><div class="card"><div class="label">재고 품목 수</div><div class="value">{{ inventories|length }}개</div></div></section>
+    <section class="card table-card"><table><thead><tr><th>물품번호</th><th>물품명</th><th>현재재고량</th><th>최소재고량</th><th>상태</th><th>보관구역</th><th>보관위치</th></tr></thead><tbody>{% for inventory in inventories %}<tr><td>#{{ inventory.item.item_id }}</td><td>{{ inventory.item.name }}</td><td>{{ inventory.cur_item_num }}개</td><td>{{ inventory.min_item_num }}개</td><td class="status {% if inventory.stock_status == '정상' %}normal{% elif inventory.stock_status == '주의' %}warning{% else %}shortage{% endif %}">{{ inventory.stock_status }}</td><td>{{ inventory.location.zone.name }}</td><td>{{ inventory.location.location_code }}</td></tr>{% empty %}<tr><td colspan="7">등록된 재고가 없습니다.</td></tr>{% endfor %}</tbody></table></section>
+  </main>
+</body>
+</html>

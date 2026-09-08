@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로그인 | AI SMART WAREHOUSE</title>
+  <style>
+    :root { --bg:#0b111e; --panel:#131b2e; --border:#1e293b; --text:#e2e8f0; --muted:#94a3b8; --blue:#38bdf8; }
+    * { box-sizing:border-box; } body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px; background:radial-gradient(circle at 50% 0%, #172b40 0, var(--bg) 42%); color:var(--text); font:13px "Segoe UI", sans-serif; }
+    .panel { width:min(100%, 390px); padding:30px; background:rgba(19,27,46,.96); border:1px solid var(--border); border-radius:6px; box-shadow:0 18px 50px rgba(0,0,0,.3); }
+    .eyebrow { color:var(--blue); font-size:10px; letter-spacing:1.5px; font-weight:700; } h1 { margin:8px 0 5px; font-size:22px; } .subtitle { margin-bottom:26px; color:var(--muted); font-size:12px; }
+    .field { margin-top:16px; } label { display:block; margin-bottom:7px; color:var(--muted); font-size:11px; } input { width:100%; padding:11px 12px; border:1px solid #263a52; border-radius:4px; background:#0d1a2b; color:var(--text); outline:none; }
+    input:focus { border-color:var(--blue); box-shadow:0 0 0 2px rgba(56,189,248,.12); } .actions { display:flex; gap:8px; margin-top:22px; }
+    button, a { flex:1; padding:10px 14px; border:0; border-radius:4px; background:#0284c7; color:#fff; font:600 12px "Segoe UI", sans-serif; text-align:center; text-decoration:none; cursor:pointer; } button:hover, a:hover { background:#0ea5e9; } a { background:#1e293b; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <div class="eyebrow">AI SMART WAREHOUSE</div><h1>관리자 로그인</h1><div class="subtitle">관제 대시보드에 접속합니다.</div>
+    <form name="f" action="login_ok/" method="post">
+      {% csrf_token %}
+      <div class="field"><label for="email">이메일</label><input id="email" name="email" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="pwd">비밀번호</label><input id="pwd" name="pwd" type="password" autocomplete="current-password" required></div>
+      <div class="actions"><button type="submit">로그인</button><a href="{% url 'robotapp:join' %}">회원가입</a></div>
+    </form>
+  </main>
+</body>
+</html>
+		}else{
+
+			pass = checkByteLen(pwdval, 30);
+

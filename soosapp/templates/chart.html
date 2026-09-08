@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Chart with Django</title>
+	{% load static %}
+	<script src="{% static 'js/chart.umd.min.js' %}"></script>
+	<style>
+		a { text-decoration:none }
+		.box { width:700px; height:400px; margin:0 auto; }
+	</style>
+</head>
+<body>
+<center>
+	<h1>Address Chart with Django</h1>
+	<a href='../'>홈</a> &nbsp;&nbsp;&nbsp; <a href='../list/'>주소록</a>
+	<hr width='700'>
+    #chart.html  에 추가 //<div class="box"> 위에
+    <select id="type" onchange="draw()">
+		<option value="bar">막대(bar)</option>
+		<option value="line">꺾은선(line)</option>
+		<option value="doughnut">도넛(doughnut)</option>
+        <option value="pie">원(pie)</option>
+        <option value="polarArea">폴라 영역(polarArea)</option>        
+        <option value="radar">래더(radar)</option>        
+	</select>
+	&nbsp;&nbsp;
+	<button type="button" onclick="load()">새로고침</button>
+	<br/><br/>
+	<div class="box"><canvas id="myChart"></canvas></div>
+    <hr width='700'>
+	<h3>날짜별 등록 추이</h3>
+	<div class="box"><canvas id="myChart2"></canvas></div>
+</center>
+
+<script>
+	const colors = ['#4e79a7','#f28e2b','#e15759','#76b7b2','#59a14f','#edc948','#b07aa1'];
+	let chartData = null;   // 서버에서 받아온 데이터
+	let chart = null;       // 그려진 차트 객체
+
+	function load(){
+		fetch('chart_data/')
+			.then(response => response.json())
+			.then(data => {
+				chartData = data;
+				draw();
+			})
+			.catch(error => console.error('Error:', error));
+	}
+
+	function draw(){
+		if(chartData == null) return;
+		//const type = 'bar';
+        const type = document.getElementById('type').value;
+
+		if(chart != null) chart.destroy();   //이전 차트 제거
+
+		chart = new Chart(document.getElementById('myChart'), {
+			type: type,
+			data: {
+				labels: chartData.labels,
+				datasets: [{
+					label: '지역별 인원수',
+					data: chartData.data,
+					backgroundColor: colors,
+					borderColor: '#4e79a7',
+					borderWidth: 1,
+					tension: 0.3
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+			}
+		});
+	}  
+
+	load();   // 페이지가 열리면 바로 호출
+
+    function load2(){
+		fetch('chart_data2/')
+			.then(response => response.json())
+			.then(data => {
+				new Chart(document.getElementById('myChart2'), {
+					type: 'line',
+					data: {
+						labels: data.labels,
+						datasets: [{
+							label: '일별 등록 건수',
+							data: data.data,
+							borderColor: '#e15759',
+							backgroundColor: '#e15759',
+							tension: 0.3
+						}]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+					}
+				});
+			});
+	}
+	load2();
+</script>
+
+</body>
+</html>

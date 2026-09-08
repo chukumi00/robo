@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI SMART WAREHOUSE</title>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg-color: #0b111e;
+      --card-bg: #131b2e;
+      --card-border: #1e293b;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-green: #22c55e;
+      --accent-orange: #f97316;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-size: 13px;
+      padding: 12px;
+    }
+
+    /* Top Navigation */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--card-bg);
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      margin-bottom: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand h1 {
+      font-size: 15px;
+      letter-spacing: 0.5px;
+    }
+
+    .brand span {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .nav-menu { position: relative; }
+    .nav-menu:hover .nav-submenu, .nav-menu:focus-within .nav-submenu { display: block; }
+    .nav-submenu { display: none; position: absolute; z-index: 10; top: 100%; right: 0; min-width: 150px; padding: 6px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 4px; box-shadow: 0 12px 24px rgba(0,0,0,.3); }
+    .nav-submenu a { display: block; padding: 8px 10px; color: var(--text-muted); text-decoration: none; font-size: 11px; white-space: nowrap; }
+    .nav-submenu a:hover { background: #1e293b; color: #fff; }
+
+    .nav-btn {
+      padding: 6px 12px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .nav-btn.active {
+      background-color: #0284c7;
+      color: #fff;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      background-color: var(--accent-red);
+      color: #fff;
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 10px;
+      margin-left: 2px;
+    }
+
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 260px 1fr 300px;
+      grid-template-rows: auto auto;
+      gap: 12px;
+    }
+
+    /* Cards */
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title .more {
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    /* Left Panel */
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .gauge-container {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+      margin: 8px 0;
+    }
+
+    .gauge {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .gauge::before {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      background-color: var(--card-bg);
+    }
+
+    .gauge-value {
+      position: relative;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .gauge-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .g1 { background: conic-gradient(var(--accent-blue) 85%, #1e293b 0); }
+    .g2 { background: conic-gradient(var(--accent-green) 92%, #1e293b 0); }
+    .g3 { background: conic-gradient(#8b5cf6 78%, #1e293b 0); }
+
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 11px;
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    .bg-green { background-color: var(--accent-green); }
+    .bg-blue { background-color: var(--accent-blue); }
+    .bg-orange { background-color: var(--accent-orange); }
+    .bg-red { background-color: var(--accent-red); }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+
+    .stat-value {
+      font-weight: bold;
+      color: var(--text-main);
+    }
+
+    /* Main Digital Twin */
+    .digital-twin {
+      position: relative;
+      background-color: #080d1a;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .view-controls {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      gap: 4px;
+    }
+
+    .btn-toggle {
+      background: #1e293b;
+      border: none;
+      color: var(--text-muted);
+      padding: 3px 8px;
+      font-size: 10px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .btn-toggle.active {
+      background: #0284c7;
+      color: #fff;
+    }
+
+    .overlay-panel {
+      position: absolute;
+      top: 45px;
+      right: 12px;
+      background: rgba(19, 27, 46, 0.85);
+      border: 1px solid var(--card-border);
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+
+    .overlay-panel label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text-muted);
+    }
+
+    .warehouse-mock {
+      width: 90%;
+      height: 320px;
+      position: relative;
+      border: 1px solid #263a52;
+      background: #0d1a2b;
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.45);
+    }
+
+    .warehouse-3d {
+      display: none;
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      cursor: grab;
+    }
+
+    .warehouse-3d:active { cursor: grabbing; }
+
+    .mode-3d .warehouse-mock { display: none; }
+    .mode-3d .warehouse-3d { display: block; }
+
+    .warehouse-mock::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(56,189,248,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56,189,248,0.08) 1px, transparent 1px);
+      background-size: 34px 34px;
+    }
+
+    .warehouse-mock::after {
+      content: 'WAREHOUSE FLOOR 01  •  LIVE SIMULATION';
+      position: absolute;
+      left: 14px;
+      bottom: 12px;
+      color: rgba(148, 163, 184, 0.7);
+      font-size: 9px;
+      letter-spacing: 0.8px;
+    }
+
+    .warehouse-rack {
+      position: absolute;
+      width: 27%;
+      height: 52px;
+      border: 2px solid #64748b;
+      border-top-width: 5px;
+      background: repeating-linear-gradient(to right, rgba(56,189,248,0.32) 0 22px, #334155 23px 27px);
+      box-shadow: 0 12px 18px rgba(0,0,0,0.35);
+    }
+
+    .rack-one { left: 8%; top: 68px; }
+    .rack-two { left: 8%; top: 146px; }
+    .rack-three { right: 8%; top: 68px; }
+
+    .warehouse-lane {
+      position: absolute;
+      left: 26%;
+      right: 26%;
+      bottom: 28px;
+      height: 92px;
+      border: 1px solid rgba(56,189,248,0.35);
+      background: rgba(56,189,248,0.06);
+    }
+
+    .zone-overlay {
+      position: absolute;
+      z-index: 1;
+      padding: 5px 8px;
+      border: 1px solid rgba(56,189,248,0.45);
+      border-radius: 3px;
+      background: rgba(8, 19, 33, 0.78);
+      color: var(--text-main);
+      font-size: 9px;
+      font-weight: 600;
+    }
+
+    .zone-overlay span { display: block; color: var(--text-muted); font-size: 8px; font-weight: normal; margin-top: 2px; }
+    .zone-one { left: 9%; top: 38%; }
+    .zone-two { right: 9%; top: 38%; }
+
+    .warehouse-light {
+      position: absolute;
+      top: 20px;
+      width: 22%;
+      height: 3px;
+      background: #38bdf8;
+      box-shadow: 0 0 16px #38bdf8;
+      opacity: 0.7;
+    }
+
+    .light-one { left: 10%; }
+    .light-two { left: 39%; }
+    .light-three { right: 10%; }
+
+    .mode-2d .warehouse-mock::after {
+      content: 'TOP VIEW  •  WAREHOUSE FLOOR 01  •  LIVE SIMULATION';
+    }
+
+    .mode-2d .warehouse-mock {
+      transform: none;
+    }
+
+    .amr-dot {
+      position: absolute;
+      z-index: 2;
+      width: 14px;
+      height: 14px;
+      border: 3px solid #d1fae5;
+      border-radius: 50%;
+      box-shadow: 0 0 0 5px rgba(34,197,94,0.18), 0 0 18px var(--accent-green);
+      background: var(--accent-green);
+    }
+
+    .mode-3d .warehouse-mock {
+      background: linear-gradient(145deg, #172b40 0%, #0e1c2e 55%, #091321 100%);
+      transform: perspective(900px) rotateX(30deg) rotateZ(-9deg) scale(0.9);
+      transform-origin: center center;
+      transform-style: preserve-3d;
+      box-shadow: 12px 20px 26px rgba(0, 0, 0, 0.5), inset 0 0 50px rgba(0, 0, 0, 0.45);
+    }
+
+    .mode-3d .warehouse-mock::before {
+      transform: skewY(-18deg) scaleY(1.35);
+      transform-origin: bottom;
+    }
+
+    .mode-3d .warehouse-rack {
+      top: 54px;
+      width: 18%;
+      height: 166px;
+      border-top-width: 7px;
+      background: repeating-linear-gradient(to bottom, rgba(56,189,248,0.32) 0 22px, #334155 23px 27px);
+      box-shadow: 7px 12px 0 rgba(15, 23, 42, 0.65), 0 12px 18px rgba(0,0,0,0.35);
+    }
+
+    .mode-3d .rack-one { left: 8%; }
+    .mode-3d .rack-two { left: 32%; top: 54px; }
+    .mode-3d .rack-three { right: 8%; top: 54px; }
+
+    .amr-tag {
+      position: absolute;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 9px;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    /* Bottom Charts Grid */
+    .bottom-grid {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .chart-box {
+      height: 145px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      padding: 24px 4px 28px;
+    }
+
+    .bar {
+      flex: 1;
+      background-color: #0284c7;
+      border-radius: 2px 2px 0 0;
+      position: relative;
+    }
+
+    .bar-inbound { display: block; width: 100%; background: var(--accent-green); }
+    .bar-outbound { display: block; width: 100%; background: var(--accent-orange); }
+
+    .bar-val {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      min-width: 20px;
+      padding: 2px 4px;
+      border: 1px solid #38bdf8;
+      border-radius: 3px;
+      background: #0b111e;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .bar-label {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 3px 5px;
+      border-radius: 3px;
+      background: #1e293b;
+      color: var(--text-main);
+      font-size: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 10px;
+      color: var(--text-muted);
+      font-size: 9px;
+      font-weight: normal;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-color {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .legend-inbound { background: var(--accent-green); }
+    .legend-outbound { background: var(--accent-orange); }
+
+    /* Right Panel */
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .cctv-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .cctv-box {
+      background: linear-gradient(160deg, #273b4d 0%, #152536 42%, #07111c 100%);
+      aspect-ratio: 16/9;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #1e293b;
+    }
+
+    .cctv-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(112deg, transparent 0 35%, rgba(56,189,248,.18) 36% 38%, transparent 39% 100%),
+        repeating-linear-gradient(90deg, transparent 0 18%, rgba(148,163,184,.34) 19% 21%, transparent 22% 31%),
+        linear-gradient(175deg, transparent 0 52%, rgba(56,189,248,.12) 53% 55%, transparent 56%);
+      opacity: .9;
+    }
+
+    .cctv-box::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.035) 4px 5px);
+      pointer-events: none;
+    }
+
+    .cam-two { background: linear-gradient(145deg, #354337 0%, #172b27 45%, #081712 100%); }
+    .cam-three { background: linear-gradient(145deg, #4a3430 0%, #2b1d25 45%, #0d121c 100%); }
+    .cam-four { background: linear-gradient(145deg, #29364d 0%, #1a2039 45%, #090e1a 100%); }
+
+    .cctv-label {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      font-size: 8px;
+      background: rgba(0,0,0,0.6);
+      padding: 1px 4px;
+      border-radius: 2px;
+      z-index: 1;
+    }
+
+    .cctv-meta {
+      position: absolute;
+      z-index: 1;
+      right: 5px;
+      bottom: 4px;
+      color: #cbd5e1;
+      font-size: 8px;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .alert-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 11px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .alert-text {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 5px 0;
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: normal;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      padding: 0 4px;
+    }
+
+    .status-indicators {
+      display: flex;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>AI SMART WAREHOUSE</h1>
+      <span>스마트 물류창고 관제 시스템</span>
+    </div>
+    <nav>
+      <a href="#" class="nav-btn active">대시보드</a>
+      <a href="#" class="nav-btn">실시간 관제</a>
+      <a href="#" class="nav-btn">디지털 트윈</a>
+      <a href="{% url 'robotapp:amr_list' %}" class="nav-btn">AMR 관제</a>
+      <a href="{% url 'robotapp:task_list' %}" class="nav-btn">작업 관리</a>
+      <div class="nav-menu">
+        <a href="{% url 'robotapp:inventory' %}" class="nav-btn">재고 관리</a>
+        <div class="nav-submenu">
+          <a href="{% url 'robotapp:inbound_create' %}">입고 등록</a>
+          <a href="{% url 'robotapp:outbound_create' %}">출고 등록</a>
+          <a href="{% url 'robotapp:inventory' %}">입출고 내역</a>
+          <a href="{% url 'robotapp:item_list' %}">물품 목록</a>
+          <a href="{% url 'robotapp:item_create' %}">물품 등록</a>
+          <a href="{% url 'robotapp:zone_list' %}">구역 관리</a>
+          <a href="{% url 'robotapp:location_list' %}">보관 위치 관리</a>
+          <a href="{% url 'robotapp:inventory_status' %}">재고 현황</a>
+        </div>
+      </div>
+      <a href="{% url 'robotapp:task_record_list' %}" class="nav-btn">이력 분석</a>
+      <a href="#" class="nav-btn">시스템 설정</a>
+    </nav>
+    <div class="user-info">
+      <span id="current-datetime"></span>
+      <span>🔔<span class="badge">12</span></span>
+      <span>👤 {{ admin_name }} ▾</span>
+    </div>
+  </header>
+
+  <div class="dashboard-grid">
+    
+    <div class="left-panel">
+      
+      <div class="card">
+        <div class="card-title">창고 현황 요약</div>
+        <div class="gauge-container">
+          <div>
+            <div class="gauge g1"><div class="gauge-value">85%</div></div>
+            <div class="gauge-label">전체 가동률</div>
+          </div>
+          <div>
+            <div class="gauge g2"><div class="gauge-value">92%</div></div>
+            <div class="gauge-label">AMR 가동률</div>
+          </div>
+          <div>
+            <div class="gauge g3"><div class="gauge-value">78%</div></div>
+            <div class="gauge-label">입출고 처리율</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          실시간 AMR 현황
+          <a class="more" href="{% url 'robotapp:amr_list' %}">더보기 ></a>
+        </div>
+        {% for amr in amrs|slice:':5' %}
+        <div class="list-item">
+          <div><span class="status-dot {% if amr.operation_state == 2 or amr.operation_state == 4 %}bg-orange{% elif amr.operation_state == 0 %}bg-blue{% else %}bg-green{% endif %}"></span>AMR-{{ amr.amr_id|stringformat:'03d' }} <span style="color:var(--text-muted)">{{ amr.operation_state_label }}</span></div>
+          <div><span style="color:var(--accent-green)">{{ amr.battery|floatformat:0 }}%</span> {% if amr.location %}{{ amr.location.zone.name }}{% else %}위치 미정{% endif %}</div>
+        </div>
+        {% empty %}<div class="list-item">등록된 AMR이 없습니다.</div>{% endfor %}
+      </div>
+
+      <div class="card">
+        <div class="card-title">입출고 현황 (오늘)</div>
+        <div class="stat-row">
+          <span style="color:var(--text-muted)">📥 입고</span>
+          <span class="stat-value">{{ inbound_count }} 건</span>
+        </div>
+        <div class="stat-row">
+          <span style="color:var(--text-muted)">📤 출고</span>
+          <span class="stat-value">{{ outbound_count }} 건</span>
+        </div>
+        <div class="stat-row">
+          <span style="color:var(--text-muted)">🔄 전체 주문</span>
+          <span class="stat-value">{{ order_count }} 건</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">창고 환경 정보</div>
+        <div class="stat-row"><span>🌡️ 온도</span><span class="stat-value">23.5 °C</span></div>
+        <div class="stat-row"><span>💧 습도</span><span class="stat-value">52 %</span></div>
+        <div class="stat-row"><span>🌫️ 미세먼지</span><span class="stat-value">12 µg/m³</span></div>
+        <div class="stat-row"><span>💡 조도</span><span class="stat-value">350 Lux</span></div>
+      </div>
+
+    </div>
+
+    <div class="digital-twin mode-2d">
+      <div style="position: absolute; top: 12px; left: 12px; font-weight: bold; font-size: 12px;">DIGITAL TWIN VIEW</div>
+      
+      <div class="view-controls">
+        <button class="btn-toggle active" type="button" data-view="2d" onclick="setTwinView('2d')">2D</button>
+        <button class="btn-toggle" type="button" data-view="3d" onclick="setTwinView('3d')">3D</button>
+      </div>
+
+      <div class="overlay-panel">
+        <div style="font-weight:bold; margin-bottom:4px;">뷰 옵션</div>
+        <label><input type="checkbox" checked> AMR 경로</label>
+        <label><input type="checkbox" checked> 작업 경로</label>
+        <label><input type="checkbox" checked> 재고 상태</label>
+        <label><input type="checkbox" checked> 충전 스테이션</label>
+        <label><input type="checkbox" checked> 안전 구역</label>
+      </div>
+
+      <div class="warehouse-mock">
+        <div class="warehouse-light light-one"></div>
+        <div class="warehouse-light light-two"></div>
+        <div class="warehouse-light light-three"></div>
+        <div class="warehouse-rack rack-one"></div>
+        <div class="warehouse-rack rack-two"></div>
+        <div class="warehouse-rack rack-three"></div>
+        <div class="warehouse-lane"></div>
+        {% for zone in zones|slice:':2' %}
+        <div class="zone-overlay {% if forloop.counter == 1 %}zone-one{% else %}zone-two{% endif %}">
+          {{ zone.name }}<span>{% if zone.state == 0 %}사용 가능{% else %}사용 불가{% endif %} · {{ zone.width }} × {{ zone.length }}m</span>
+        </div>
+        {% endfor %}
+        {% for amr in amr_data %}
+        <div class="amr-dot" style="top: {{ amr.top }}%; left: {{ amr.left }}%; {% if amr.operation_state == 2 or amr.operation_state == 4 %}background:var(--accent-orange); box-shadow:0 0 0 5px rgba(249,115,22,0.18),0 0 18px var(--accent-orange);{% elif amr.operation_state == 0 %}background:var(--accent-red); box-shadow:0 0 0 5px rgba(239,68,68,0.18),0 0 18px var(--accent-red);{% endif %}"></div>
+        <div class="amr-tag" style="top: calc({{ amr.top }}% - 20px); left: {{ amr.left }}%; background:{% if amr.operation_state == 2 or amr.operation_state == 4 %}var(--accent-orange){% elif amr.operation_state == 0 %}var(--accent-red){% else %}var(--accent-green){% endif %};">AMR-{{ amr.id|stringformat:'03d' }} {{ amr.operation_state_label }}</div>
+        {% endfor %}
+      </div>
+      <canvas id="warehouse-3d" class="warehouse-3d" aria-label="3D warehouse digital twin"></canvas>
+    </div>
+
+    <div class="right-panel">
+      
+      <div class="card">
+        <div class="card-title">
+          실시간 CCTV
+          <span class="more">전체 보기 ></span>
+        </div>
+        <div class="cctv-grid">
+          <div class="cctv-box"><span class="cctv-label">CAM 01</span><span class="cctv-meta">입고 구역 · REC</span></div>
+          <div class="cctv-box cam-two"><span class="cctv-label">CAM 02</span><span class="cctv-meta">랙 A-12 · REC</span></div>
+          <div class="cctv-box cam-three"><span class="cctv-label">CAM 03</span><span class="cctv-meta">출고 게이트 · REC</span></div>
+          <div class="cctv-box cam-four"><span class="cctv-label">CAM 04</span><span class="cctv-meta">충전 스테이션 · REC</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          알림 / 이상 감지
+          <span class="more">더보기 ></span>
+        </div>
+        <div class="alert-item">
+          <div class="alert-text"><span style="color:var(--accent-red)">⚠️</span> AMR-004 배터리 부족</div>
+          <span style="color:var(--text-muted)">14:32</span>
+        </div>
+        <div class="alert-item">
+          <div class="alert-text"><span style="color:var(--accent-orange)">⚠️</span> Zone C 재고 부족 알림</div>
+          <span style="color:var(--text-muted)">14:28</span>
+        </div>
+        <div class="alert-item">
+          <div class="alert-text"><span style="color:var(--accent-red)">⚠️</span> CAM 03 이상 움직임 감지</div>
+          <span style="color:var(--text-muted)">14:25</span>
+        </div>
+        <div class="alert-item">
+          <div class="alert-text"><span style="color:var(--accent-orange)">⚠️</span> 온도 기준치 초과 (24.5°C)</div>
+          <span style="color:var(--text-muted)">14:20</span>
+        </div>
+        <div class="alert-item">
+          <div class="alert-text"><span style="color:var(--accent-red)">⚠️</span> AMR-002 경로 이탈</div>
+          <span style="color:var(--text-muted)">14:18</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          실시간 작업 리스트
+          <span class="more">더보기 ></span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>작업 ID</th>
+              <th>작업 유형</th>
+              <th>상태</th>
+              <th>우선순위</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>TSK-0001</td>
+              <td>피킹</td>
+              <td><span style="color:var(--accent-green)">진행 중</span></td>
+              <td><span style="color:var(--accent-red)">● 높음</span></td>
+            </tr>
+            <tr>
+              <td>TSK-0002</td>
+              <td>이동</td>
+              <td><span style="color:var(--accent-green)">진행 중</span></td>
+              <td><span style="color:var(--accent-orange)">● 보통</span></td>
+            </tr>
+            <tr>
+              <td>TSK-0003</td>
+              <td>적재</td>
+              <td><span style="color:var(--text-muted)">대기 중</span></td>
+              <td><span style="color:var(--accent-red)">● 높음</span></td>
+            </tr>
+            <tr>
+              <td>TSK-0004</td>
+              <td>피킹</td>
+              <td><span style="color:var(--accent-green)">진행 중</span></td>
+              <td><span style="color:var(--text-muted)">● 낮음</span></td>
+            </tr>
+            <tr>
+              <td>TSK-0005</td>
+              <td>이동</td>
+              <td><span style="color:var(--text-muted)">대기 중</span></td>
+              <td><span style="color:var(--accent-orange)">● 보통</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <div class="bottom-grid">
+      
+      <div class="card">
+        <div class="card-title">
+          <span>시간대별 입출고 건수 추이 (오늘)</span>
+          <span class="chart-legend">
+            <span class="legend-item"><span class="legend-color legend-inbound"></span>입고</span>
+            <span class="legend-item"><span class="legend-color legend-outbound"></span>출고</span>
+          </span>
+        </div>
+        <div class="chart-box">
+          {% for item in hourly_orders %}
+          <div class="bar" style="height: {{ item.height }}%;"><span class="bar-val">{{ item.count }}건</span><span class="bar-inbound" style="height: {{ item.inbound_percent }}%;"></span><span class="bar-outbound" style="height: {{ item.outbound_percent }}%;"></span><span class="bar-label">{{ item.label }}</span></div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">재고 현황</div>
+        <div style="font-size: 11px; color: var(--text-muted);">
+          총 재고: <strong style="color:#fff; font-size:14px;">{{ total_stock }}</strong> 개
+        </div>
+        <div style="margin-top: 8px; font-size: 10px;">
+          <div><span class="status-dot bg-blue"></span> 정상: {{ normal_count }}개 ({{ normal_percent }}%)</div>
+          <div><span class="status-dot bg-orange"></span> 주의: {{ warning_count }}개 ({{ warning_percent }}%)</div>
+          <div><span class="status-dot bg-red"></span> 부족: {{ shortage_count }}개 ({{ shortage_percent }}%)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">AMR 작업 효율 (오늘)</div>
+        <div class="chart-box">
+          <div class="bar" style="height: 80%; background:#38bdf8;"><span class="bar-val">245</span></div>
+          <div class="bar" style="height: 60%; background:#38bdf8;"><span class="bar-val">198</span></div>
+          <div class="bar" style="height: 90%; background:#a855f7;"><span class="bar-val">276</span></div>
+          <div class="bar" style="height: 50%; background:#a855f7;"><span class="bar-val">165</span></div>
+          <div class="bar" style="height: 70%; background:#38bdf8;"><span class="bar-val">210</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">작업 유형 비율 (오늘)</div>
+        <div style="display: flex; gap: 12px; align-items: center; height: 100px;">
+          <div class="gauge g1" style="width:70px; height:70px;"><div class="gauge-value">100%</div></div>
+          <div style="font-size: 10px; display:flex; flex-direction:column; gap:4px;">
+            <div><span class="status-dot bg-blue"></span> 피킹 45%</div>
+            <div><span class="status-dot bg-green"></span> 이동 30%</div>
+            <div><span class="status-dot bg-orange"></span> 적재 15%</div>
+            <div><span class="status-dot" style="background:#a855f7"></span> 충전 10%</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  {{ twin_zones|json_script:"twin-zones-data" }}
+  {{ amr_data|json_script:"amr-data" }}
+  <script>
+    let warehouse3DInitialized = false;
+
+    async function initializeWarehouse3D() {
+      if (warehouse3DInitialized) return;
+      warehouse3DInitialized = true;
+
+      const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js');
+      const { OrbitControls } = await import('https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js');
+      const canvas = document.getElementById('warehouse-3d');
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x081321);
+
+      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
+      camera.position.set(15, 16, 18);
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.target.set(0, 1.5, 0);
+      controls.enableDamping = true;
+      controls.maxPolarAngle = Math.PI / 2.05;
+      controls.minDistance = 10;
+      controls.maxDistance = 35;
+
+      scene.add(new THREE.HemisphereLight(0x9bdcff, 0x101827, 2.2));
+      const keyLight = new THREE.DirectionalLight(0xffffff, 3.5);
+      keyLight.position.set(8, 18, 10);
+      scene.add(keyLight);
+
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(24, 0.25, 16), new THREE.MeshStandardMaterial({ color: 0x10243a, roughness: 0.78 }));
+      floor.position.y = -0.15;
+      scene.add(floor);
+      scene.add(new THREE.GridHelper(24, 24, 0x2d6280, 0x1a3a53));
+
+      const twinZones = JSON.parse(document.getElementById('twin-zones-data').textContent);
+      function addZone(zone, x, z, color) {
+        const width = Math.min(zone.width * 0.2, 9);
+        const length = Math.min(zone.length * 0.2, 7);
+        const zoneFloor = new THREE.Mesh(
+          new THREE.BoxGeometry(width, 0.04, length),
+          new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.2, emissive: color, emissiveIntensity: 0.15 })
+        );
+        zoneFloor.position.set(x, 0.05, z);
+        scene.add(zoneFloor);
+
+        const labelCanvas = document.createElement('canvas');
+        labelCanvas.width = 512;
+        labelCanvas.height = 96;
+        const labelContext = labelCanvas.getContext('2d');
+        labelContext.fillStyle = '#e2e8f0';
+        labelContext.font = 'bold 28px Segoe UI';
+        labelContext.fillText(`${zone.name}  ${zone.width} x ${zone.length}m`, 12, 36);
+        labelContext.font = '22px Segoe UI';
+        labelContext.fillStyle = zone.state === 0 ? '#22c55e' : '#ef4444';
+        labelContext.fillText(zone.state === 0 ? '사용 가능' : '사용 불가', 12, 70);
+        const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(labelCanvas), transparent: true }));
+        label.scale.set(5, 0.95, 1);
+        label.position.set(x, 5.4, z);
+        scene.add(label);
+      }
+
+      if (twinZones[0]) addZone(twinZones[0], -6, -4, 0x1976a8);
+      if (twinZones[1]) addZone(twinZones[1], 6, -4, 0xb66a2c);
+
+      function addRack(x, z, color) {
+        const rack = new THREE.Group();
+        const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.35, roughness: 0.55 });
+        const shelfMaterial = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.12 });
+        for (const y of [1, 2.5, 4]) {
+          const shelf = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.16, 1.1), shelfMaterial);
+          shelf.position.y = y;
+          rack.add(shelf);
+          for (const side of [-2.65, 2.65]) {
+            const post = new THREE.Mesh(new THREE.BoxGeometry(0.16, 5, 0.16), frameMaterial);
+            post.position.set(side, 2.5, 0);
+            rack.add(post);
+          }
+        }
+        rack.position.set(x, 0, z);
+        scene.add(rack);
+      }
+
+      addRack(-6, -4, 0x1976a8);
+      addRack(-6, 1.5, 0x1b8c78);
+      addRack(6, -4, 0xb66a2c);
+
+      function addBox(x, y, z, color) {
+        const box = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), new THREE.MeshStandardMaterial({ color }));
+        box.position.set(x, y, z);
+        scene.add(box);
+      }
+      addBox(-6.8, 1.45, -4, 0xf59e0b);
+      addBox(-5.6, 2.95, -4, 0x38bdf8);
+      addBox(0.8, 1.45, -4, 0x22c55e);
+      addBox(6.4, 2.95, -4, 0xef4444);
+
+      function addAmr(x, z, color, data) {
+        const robot = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.35, 1.1), new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.25 }));
+        robot.position.set(x, 0.3, z);
+        scene.add(robot);
+        const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        beacon.position.set(x, 0.58, z);
+        scene.add(beacon);
+        const labelCanvas = document.createElement('canvas');
+        labelCanvas.width = 320;
+        labelCanvas.height = 64;
+        const labelContext = labelCanvas.getContext('2d');
+        labelContext.fillStyle = '#e2e8f0';
+        labelContext.font = 'bold 24px Segoe UI';
+        labelContext.fillText(`AMR-${String(data.id).padStart(3, '0')} ${data.operation_state_label}`, 8, 38);
+        const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(labelCanvas), transparent: true }));
+        label.scale.set(3.8, 0.76, 1);
+        label.position.set(x, 1.2, z);
+        scene.add(label);
+      }
+      const amrColors = { 0: 0xef4444, 1: 0x22c55e, 2: 0xf97316, 3: 0x38bdf8, 4: 0xf59e0b };
+      const warehouseAmrs = JSON.parse(document.getElementById('amr-data').textContent);
+      warehouseAmrs.forEach((amr) => {
+        const x = Math.max(-10, Math.min(10, amr.x / 4 - 8));
+        const z = Math.max(-6, Math.min(6, amr.y / 4 - 3));
+        addAmr(x, z, amrColors[amr.operation_state] || 0x38bdf8, amr);
+      });
+
+      function resize() {
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height, false);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+    }
+
+    function updateDateTime() {
+      const now = new Date();
+      const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+      const pad = (value) => String(value).padStart(2, '0');
+      const dateTime = [
+        now.getFullYear(),
+        pad(now.getMonth() + 1),
+        pad(now.getDate())
+      ].join('.') + ` (${weekdays[now.getDay()]}) ` + [
+        pad(now.getHours()),
+        pad(now.getMinutes()),
+        pad(now.getSeconds())
+      ].join(':');
+
+      document.getElementById('current-datetime').textContent = dateTime;
+    }
+
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    function setTwinView(view) {
+      const twin = document.querySelector('.digital-twin');
+      twin.classList.toggle('mode-2d', view === '2d');
+      twin.classList.toggle('mode-3d', view === '3d');
+
+      document.querySelectorAll('.btn-toggle').forEach((button) => {
+        button.classList.toggle('active', button.dataset.view === view);
+      });
+
+      if (view === '3d') initializeWarehouse3D().catch((error) => console.error('3D view failed to load:', error));
+    }
+  </script>
+
+  <footer>
+    <div>Copyright © 2026 AI Smart Warehouse System. All rights reserved.</div>
+    <div class="status-indicators">
+      <span><span class="status-dot bg-green"></span>시스템 정상</span>
+      <span><span class="status-dot bg-green"></span>네트워크 정상</span>
+      <span><span class="status-dot bg-green"></span>DB 연결 정상</span>
+      <span>Ver 1.0.0</span>
+    </div>
+  </footer>
+
+</body>
+</html>

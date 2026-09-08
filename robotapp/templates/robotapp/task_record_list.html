@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>경로 및 위치이력 | AI SMART WAREHOUSE</title>
+  <style>
+    :root { --bg:#0b111e; --panel:#131b2e; --border:#1e293b; --text:#e2e8f0; --muted:#94a3b8; --blue:#38bdf8; --green:#22c55e; --orange:#f97316; --red:#ef4444; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; padding:24px; background:radial-gradient(circle at 50% 0%,#172b40 0,var(--bg) 42%); color:var(--text); font:13px "Segoe UI",sans-serif; }
+    .wrap { max-width:1250px; margin:auto; }
+    .top { display:flex; justify-content:space-between; align-items:end; margin-bottom:22px; }
+    .eyebrow { color:var(--blue); font-size:10px; letter-spacing:1.5px; font-weight:700; }
+    h1 { margin:7px 0 4px; font-size:24px; }
+    .muted { color:var(--muted); font-size:12px; }
+    a, button { border:0; border-radius:4px; padding:10px 13px; background:#0284c7; color:#fff; font:600 12px "Segoe UI",sans-serif; text-decoration:none; cursor:pointer; }
+    a.secondary { background:#1e293b; color:var(--muted); }
+    .card { padding:16px; background:rgba(19,27,46,.96); border:1px solid var(--border); border-radius:6px; overflow:auto; }
+    .filters { display:flex; gap:10px; margin-bottom:16px; }
+    .filters input, .filters select { padding:8px; border:1px solid #263a52; border-radius:4px; background:#0d1a2b; color:var(--text); font-size:11px; }
+    table { width:100%; border-collapse:collapse; min-width:900px; }
+    th, td { padding:11px 9px; border-bottom:1px solid var(--border); text-align:left; font-size:11px; white-space:nowrap; }
+    th { color:var(--muted); font-weight:500; }
+    @media(max-width:700px) { body { padding:16px; } .top { display:block; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top"><div><div class="eyebrow">AI SMART WAREHOUSE / PATH &amp; LOCATION HISTORY</div><h1>경로 및 위치이력</h1><div class="muted">AMR이 창고 내부에서 이동한 경로 및 위치 이력을 조회합니다.</div></div><a class="secondary" href="{% url 'robotapp:index' %}">대시보드</a></div>
+    <section class="card">
+      <form class="filters" method="get">
+        <input type="text" name="task_id" placeholder="작업번호" value="{{ task_id }}">
+        <select name="amr_id"><option value="">전체 AMR</option>{% for amr in amrs %}<option value="{{ amr.amr_id }}" {% if amr_id == amr.amr_id|stringformat:'s' %}selected{% endif %}>AMR-{{ amr.amr_id|stringformat:'03d' }}</option>{% endfor %}</select>
+        <button type="submit">조회</button>
+      </form>
+      <table><thead><tr><th>작업번호</th><th>로봇번호</th><th>위치좌표(X,Y)</th><th>작업시간</th><th>작업상태</th></tr></thead><tbody>
+{% for record in records %}<tr><td>TASK-{{ record.task.task_id|stringformat:'04d' }}</td><td>{% if record.task.amr %}AMR-{{ record.task.amr.amr_id|stringformat:'03d' }}{% else %}-{% endif %}</td><td>({{ record.x_coord }}, {{ record.y_coord }})</td><td>{{ record.record_time|date:'Y.m.d H:i:s' }}</td><td>{{ record.status_label }}</td></tr>{% empty %}<tr><td colspan="5">등록된 위치이력이 없습니다.</td></tr>{% endfor %}
+      </tbody></table>
+    </section>
+  </main>
+</body>
+</html>

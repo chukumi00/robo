@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>작업 관리 | AI SMART WAREHOUSE</title>
+  <style>
+    :root { --bg:#0b111e; --panel:#131b2e; --border:#1e293b; --text:#e2e8f0; --muted:#94a3b8; --blue:#38bdf8; --green:#22c55e; --orange:#f97316; --red:#ef4444; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; padding:24px; background:radial-gradient(circle at 50% 0%,#172b40 0,var(--bg) 42%); color:var(--text); font:13px "Segoe UI",sans-serif; }
+    .wrap { max-width:1250px; margin:auto; }
+    .top { display:flex; justify-content:space-between; align-items:end; margin-bottom:22px; }
+    .eyebrow { color:var(--blue); font-size:10px; letter-spacing:1.5px; font-weight:700; }
+    h1 { margin:7px 0 4px; font-size:24px; }
+    .muted { color:var(--muted); font-size:12px; }
+    a, button { border:0; border-radius:4px; padding:10px 13px; background:#0284c7; color:#fff; font:600 12px "Segoe UI",sans-serif; text-decoration:none; cursor:pointer; }
+    a.secondary { background:#1e293b; color:var(--muted); }
+    .card { padding:16px; background:rgba(19,27,46,.96); border:1px solid var(--border); border-radius:6px; overflow:auto; }
+    table { width:100%; border-collapse:collapse; min-width:1100px; }
+    th, td { padding:11px 9px; border-bottom:1px solid var(--border); text-align:left; font-size:11px; white-space:nowrap; }
+    th { color:var(--muted); font-weight:500; }
+    select { padding:7px; border:1px solid #263a52; border-radius:4px; background:#0d1a2b; color:var(--text); font-size:11px; }
+    .assign button { padding:7px 9px; font-size:11px; }
+    .inline { display:inline; }
+    @media(max-width:700px) { body { padding:16px; } .top { display:block; } .actions { margin-top:16px; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top"><div><div class="eyebrow">AI SMART WAREHOUSE / TASK CONTROL</div><h1>작업 관리</h1><div class="muted">입출고 작업을 AMR에 배정하고 처리 상태를 관리합니다.</div></div><a class="secondary" href="{% url 'robotapp:index' %}">대시보드</a></div>
+    <section class="card"><table><thead><tr><th>작업번호</th><th>주문번호</th><th>물품번호</th><th>담당 AMR</th><th>출발위치</th><th>목적위치</th><th>주문타입</th><th>작업상태</th><th>시작시간</th><th>완료시간</th></tr></thead><tbody>
+{% for task in tasks %}<tr><td>TASK-{{ task.task_id|stringformat:'04d' }}</td><td>{% if task.order %}#{{ task.order.order_id }}{% else %}-{% endif %}</td><td>{% if task.item %}#{{ task.item.item_id }}{% else %}-{% endif %}</td><td>{% if task.amr %}AMR-{{ task.amr.amr_id|stringformat:'03d' }}{% else %}<form class="inline assign" method="post" action="{% url 'robotapp:task_assign' task.task_id %}">{% csrf_token %}<select name="amr_id" required><option value="">AMR 배정</option>{% for amr in available_amrs %}<option value="{{ amr.amr_id }}">AMR-{{ amr.amr_id|stringformat:'03d' }}</option>{% endfor %}</select><button type="submit">배정</button></form>{% endif %}</td><td>{% if task.start_location %}{{ task.start_location.location_code }}{% else %}-{% endif %}</td><td>{% if task.end_location %}{{ task.end_location.location_code }}{% else %}-{% endif %}</td><td>{{ task.get_priority_display }}</td><td><form method="post" action="{% url 'robotapp:task_status_update' task.task_id %}">{% csrf_token %}<select name="status" onchange="this.form.submit()">{% for value,label in status_choices %}<option value="{{ value }}" {% if task.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></form></td><td>{{ task.start_time|date:'Y.m.d H:i'|default:'-' }}</td><td>{{ task.end_time|date:'Y.m.d H:i'|default:'-' }}</td></tr>{% empty %}<tr><td colspan="10">등록된 작업이 없습니다.</td></tr>{% endfor %}
+  </tbody></table></section>
+  </main>
+</body>
+</html>

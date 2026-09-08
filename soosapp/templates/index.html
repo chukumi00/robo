@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<style>
+    a {text-decoration:none} 
+</style>
+<center>
+    <h1>Soo's index.html</h1>
+    <a href="list">주소록</a><br/>
+    <br/><br/>
+
+    <a href="board/list/">게시판</a><br/><br/>
+
+    <!-- <a href="upload">파일업로드</a><br/> -->
+    <a href="upload/list/">파일리스트</a><br/>
+
+    <a href="chart">차트</a><br/>
+    
+    <a href="join">회원가입(이메일중복체크)</a><br/><br/>
+    
+
+    <a href="template1/">template1</a><br/><br/>
+    <a href="template2/">template2</a><br/><br/>
+    <a href="template3/">template3</a><br/><br/>    
+
+    <!-- login_ok_user: {{request.session.login_ok_user}} -->
+    {% if request.session.login_ok_user %}
+        <a href="logout">로그아웃</a><br/>
+    {% else %}
+        <a href="login">로그인</a><br/>
+    {% endif %}
+</center>

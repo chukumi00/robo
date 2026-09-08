@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Title</title>
+		<style>
+			table, th, td {
+			   border: 1px solid black;
+			   border-collapse: collapse;
+			}
+			th, td {
+			   padding: 5px;
+			}
+			a { text-decoration:none }
+		</style>
+	</head>
+
+	<body style="text-align:center">
+		<center>
+			<h1>
+				Address List with Django
+			</h1>
+			<a href='../write'>입력</a>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<a href='../'>홈</a><br/>
+			<table border='1' cellpadding='7' cellspacing='2' width='70%'>
+			<tr>
+			<th>번호</th>
+			<th>이름</th>
+			<th>주소</th>
+			<th>날짜</th>
+			<th>삭제</th>
+			</tr>
+
+			{% for address in addresses%}
+			<tr>
+			<td align='center'><a href='../update/{{address.id}}'>{{address.id}}</a></td>
+			<td align='center'>{{address.name}}</td>
+			<td align='center'>{{address.addr}}</td>
+			<td align='center'>{{address.rdate}}</td>
+			<td align='center'><a href='../delete/{{address.id}}'>삭제</a></td>
+			</tr>
+			{% endfor %}
+			
+			</table>
+		</center>
+	</body>
+</html>
