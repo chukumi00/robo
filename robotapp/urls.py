@@ -33,4 +33,5 @@ urlpatterns = [
     path('tasks/<int:task_id>/assign/', views.task_assign, name='task_assign'),
     path('tasks/<int:task_id>/status/', views.task_status_update, name='task_status_update'),
     path('tasks/records/', views.task_record_list, name='task_record_list'),
+    path('api/amr/<int:amr_id>/location/', views.amr_location_update_api, name='amr_location_api'),
 ]
