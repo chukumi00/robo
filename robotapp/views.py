@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.conf import settings
 from django.http import HttpResponse
 from datetime import datetime
 from django.utils import timezone
@@ -172,7 +173,10 @@ def join(request):
     template = loader.get_template('robotapp/join.html')
     return HttpResponse(template.render({}, request))
 
+import json
+
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 def check_email(request):
     email = request.GET.get('email', None)
     is_exists = Member.objects.filter(email=email).exists()
@@ -257,25 +261,109 @@ def task_status_update(request, task_id):
                     task.amr.save(update_fields=['operation_state'])
     return HttpResponseRedirect(reverse('robotapp:task_list'))
 
+def build_path_data(path_records):
+    return [
+        {
+            'order': index,
+            'task_id': record.task_id,
+            'amr_id': record.task.amr_id if record.task.amr_id else None,
+            'x': record.x_coord,
+            'y': record.y_coord,
+            'time': (
+                timezone.localtime(record.record_time)
+                if timezone.is_aware(record.record_time)
+                else record.record_time
+            ).strftime('%Y-%m-%d %H:%M:%S'),
+        }
+        for index, record in enumerate(path_records, start=1)
+    ]
+
 def task_record_list(request):
-    records = TaskRecord.objects.select_related('task__amr').order_by('-record_time', '-task_record_id')
+    record_queryset = TaskRecord.objects.select_related('task__amr')
     task_id = request.GET.get('task_id', '').strip()
     amr_id = request.GET.get('amr_id', '').strip()
     if task_id:
-        records = records.filter(task_id=task_id)
+        record_queryset = record_queryset.filter(task_id=task_id)
     if amr_id:
-        records = records.filter(task__amr_id=amr_id)
+        record_queryset = record_queryset.filter(task__amr_id=amr_id)
+    records = record_queryset.order_by('record_time', 'task_record_id')
+    path_records = list(records)
+    if request.GET.get('format') == 'json':
+        return JsonResponse({'points': build_path_data(path_records)})
     status_labels = {0: '대기', 1: '진행', 2: '완료', 3: '취소'}
     for record in records:
         record.status_label = status_labels.get(record.task_status, '알 수 없음')
+    path_data = build_path_data(path_records)
     context = {
         'records': records,
+        'path_data': path_data,
         'task_id': task_id,
         'amr_id': amr_id,
         'amrs': AMR.objects.order_by('amr_id'),
     }
     template = loader.get_template('robotapp/task_record_list.html')
     return HttpResponse(template.render(context, request))
+
+@csrf_exempt
+def amr_location_update_api(request, amr_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST 요청만 허용됩니다.'}, status=405)
+    try:
+        payload = json.loads(request.body)
+        x_coord = float(payload['x'])
+        y_coord = float(payload['y'])
+        z_coord = float(payload.get('z', 0))
+    except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+        return JsonResponse({'error': 'x, y 좌표가 포함된 JSON이 필요합니다.'}, status=400)
+
+    try:
+        record_time = datetime.fromisoformat(payload['timestamp'].replace('Z', '+00:00')) if payload.get('timestamp') else timezone.now()
+    except (AttributeError, TypeError, ValueError):
+        return JsonResponse({'error': 'timestamp는 ISO 8601 형식이어야 합니다.'}, status=400)
+    if settings.USE_TZ and timezone.is_naive(record_time):
+        record_time = timezone.make_aware(record_time, timezone.get_current_timezone())
+    elif not settings.USE_TZ and timezone.is_aware(record_time):
+        record_time = timezone.make_naive(record_time, timezone.get_current_timezone())
+
+    with transaction.atomic():
+        amr = get_object_or_404(AMR.objects.select_for_update(), pk=amr_id)
+        task_id = payload.get('task_id')
+        if task_id:
+            task = get_object_or_404(Task, pk=task_id, amr=amr)
+        else:
+            task = Task.objects.filter(
+                amr=amr,
+                status__in=[Task.Status.WAITING, Task.Status.IN_PROGRESS],
+            ).order_by('-status', '-task_time').first()
+        if not task:
+            return JsonResponse({'error': '해당 AMR에 배정된 진행 작업이 없습니다.'}, status=409)
+
+        record = TaskRecord.objects.create(
+            task=task,
+            x_coord=x_coord,
+            y_coord=y_coord,
+            z_coord=z_coord,
+            record_time=record_time,
+            task_status=task.status,
+        )
+
+        known_location = Location.objects.filter(
+            x_coord=x_coord,
+            y_coord=y_coord,
+            z_coord=z_coord,
+        ).first()
+        if known_location and amr.location_id != known_location.location_id:
+            amr.location = known_location
+            amr.save(update_fields=['location'])
+
+    return JsonResponse({
+        'status': 'success',
+        'task_id': task.task_id,
+        'amr_id': amr.amr_id,
+        'record_id': record.task_record_id,
+        'record_time': record.record_time.isoformat(),
+        'created': True,
+    })
 
 def inventory_status(request):
     inventories = Inventory.objects.select_related('item', 'location__zone').order_by('item__name')

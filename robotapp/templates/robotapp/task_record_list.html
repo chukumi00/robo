@@ -18,6 +18,10 @@
     .card { padding:16px; background:rgba(19,27,46,.96); border:1px solid var(--border); border-radius:6px; overflow:auto; }
     .filters { display:flex; gap:10px; margin-bottom:16px; }
     .filters input, .filters select { padding:8px; border:1px solid #263a52; border-radius:4px; background:#0d1a2b; color:var(--text); font-size:11px; }
+    .path-card { margin-bottom:16px; }
+    .path-card h2 { margin:0 0 10px; font-size:15px; }
+    canvas { display:block; width:100%; height:300px; background:#0d1a2b; border:1px solid #263a52; border-radius:4px; }
+    .path-empty { padding:24px; text-align:center; color:var(--muted); }
     table { width:100%; border-collapse:collapse; min-width:900px; }
     th, td { padding:11px 9px; border-bottom:1px solid var(--border); text-align:left; font-size:11px; white-space:nowrap; }
     th { color:var(--muted); font-weight:500; }
@@ -30,13 +34,75 @@
     <section class="card">
       <form class="filters" method="get">
         <input type="text" name="task_id" placeholder="작업번호" value="{{ task_id }}">
-        <select name="amr_id"><option value="">전체 AMR</option>{% for amr in amrs %}<option value="{{ amr.amr_id }}" {% if amr_id == amr.amr_id|stringformat:'s' %}selected{% endif %}>AMR-{{ amr.amr_id|stringformat:'03d' }}</option>{% endfor %}</select>
+        <select name="amr_id" onchange="this.form.submit()"><option value="">전체 AMR</option>{% for amr in amrs %}<option value="{{ amr.amr_id }}" {% if amr_id == amr.amr_id|stringformat:'s' %}selected{% endif %}>AMR-{{ amr.amr_id|stringformat:'03d' }}</option>{% endfor %}</select>
         <button type="submit">조회</button>
       </form>
-      <table><thead><tr><th>작업번호</th><th>로봇번호</th><th>위치좌표(X,Y)</th><th>작업시간</th><th>작업상태</th></tr></thead><tbody>
-{% for record in records %}<tr><td>TASK-{{ record.task.task_id|stringformat:'04d' }}</td><td>{% if record.task.amr %}AMR-{{ record.task.amr.amr_id|stringformat:'03d' }}{% else %}-{% endif %}</td><td>({{ record.x_coord }}, {{ record.y_coord }})</td><td>{{ record.record_time|date:'Y.m.d H:i:s' }}</td><td>{{ record.status_label }}</td></tr>{% empty %}<tr><td colspan="5">등록된 위치이력이 없습니다.</td></tr>{% endfor %}
+      <div class="card path-card"><h2>시간순 이동 경로{% if amr_id %} · AMR-{{ amr_id|stringformat:'03d' }}{% endif %}</h2><canvas id="pathCanvas" aria-label="AMR 이동 경로"></canvas><div class="muted"><span id="pathPointCount">{{ path_data|length }}</span>개 위치 포인트 · 가장 오래된 위치부터 표시 · 3초마다 갱신</div><div id="pathEmpty" class="path-empty"{% if path_data %} style="display:none"{% endif %}>선택한 조건의 경로 데이터가 없습니다.</div></div>
+      <table><thead><tr><th>경로순번</th><th>작업번호</th><th>로봇번호</th><th>위치좌표(X,Y)</th><th>작업시간</th><th>작업상태</th></tr></thead><tbody>
+{% for record in records %}<tr><td>{{ forloop.counter }}</td><td>TASK-{{ record.task.task_id|stringformat:'04d' }}</td><td>{% if record.task.amr %}AMR-{{ record.task.amr.amr_id|stringformat:'03d' }}{% else %}-{% endif %}</td><td>({{ record.x_coord }}, {{ record.y_coord }})</td><td>{{ record.record_time|date:'Y.m.d H:i:s' }}</td><td>{{ record.status_label }}</td></tr>{% empty %}<tr><td colspan="6">등록된 위치이력이 없습니다.</td></tr>{% endfor %}
       </tbody></table>
     </section>
   </main>
+  {{ path_data|json_script:"path-data-json" }}<script>
+    let points = JSON.parse(document.getElementById('path-data-json').textContent);
+    const canvas = document.getElementById('pathCanvas');
+    const context = canvas.getContext('2d');
+    function drawPath() {
+      const ratio = window.devicePixelRatio || 1;
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      canvas.width = width * ratio;
+      canvas.height = height * ratio;
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      document.getElementById('pathEmpty').style.display = points.length ? 'none' : 'block';
+      if (!points.length) {
+        context.clearRect(0, 0, width, height);
+        return;
+      }
+      const xs = points.map(point => point.x);
+      const ys = points.map(point => point.y);
+      const warehouseBounds = { minX: 0, maxX: 70, minY: 0, maxY: 30 };
+      const minX = Math.min(warehouseBounds.minX, ...xs);
+      const maxX = Math.max(warehouseBounds.maxX, ...xs);
+      const minY = Math.min(warehouseBounds.minY, ...ys);
+      const maxY = Math.max(warehouseBounds.maxY, ...ys);
+      const scaleX = value => 24 + ((value - minX) / (maxX - minX || 1)) * (width - 48);
+      const scaleY = value => height - 24 - ((value - minY) / (maxY - minY || 1)) * (height - 48);
+      context.clearRect(0, 0, width, height);
+      context.strokeStyle = '#263a52';
+      context.lineWidth = 1;
+      for (let index = 1; index < 5; index += 1) {
+        const x = (width / 5) * index;
+        const y = (height / 5) * index;
+        context.beginPath(); context.moveTo(x, 0); context.lineTo(x, height); context.stroke();
+        context.beginPath(); context.moveTo(0, y); context.lineTo(width, y); context.stroke();
+      }
+      context.beginPath();
+      points.forEach((point, index) => { const x = scaleX(point.x), y = scaleY(point.y); index ? context.lineTo(x, y) : context.moveTo(x, y); });
+      context.strokeStyle = '#38bdf8'; context.lineWidth = 3; context.stroke();
+      points.forEach((point, index) => {
+        const x = scaleX(point.x), y = scaleY(point.y);
+        context.beginPath(); context.arc(x, y, 6, 0, Math.PI * 2);
+        context.fillStyle = index === 0 ? '#22c55e' : index === points.length - 1 ? '#f97316' : '#e2e8f0'; context.fill();
+        context.fillStyle = '#e2e8f0'; context.font = '11px Segoe UI';
+        context.fillText(`(${point.x}, ${point.y})`, x + 9, y - 8);
+      });
+    }
+    drawPath();
+    window.addEventListener('resize', drawPath);
+    const refreshPath = () => {
+      const params = new URLSearchParams(window.location.search);
+      params.set('format', 'json');
+      fetch(`${window.location.pathname}?${params.toString()}`, { cache: 'no-store' })
+        .then(response => response.ok ? response.json() : Promise.reject(response.status))
+        .then(data => {
+          points = data.points;
+          document.getElementById('pathPointCount').textContent = points.length;
+          drawPath();
+        })
+        .catch(() => {});
+    };
+    window.setInterval(refreshPath, 3000);
+  </script>
 </body>
 </html>
