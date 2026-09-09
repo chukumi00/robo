@@ -174,6 +174,7 @@ def join(request):
     return HttpResponse(template.render({}, request))
 
 import json
+import re
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -283,7 +284,11 @@ def task_record_list(request):
     task_id = request.GET.get('task_id', '').strip()
     amr_id = request.GET.get('amr_id', '').strip()
     if task_id:
-        record_queryset = record_queryset.filter(task_id=task_id)
+        task_number = re.fullmatch(r'(?:TASK[-\s]*)?(\d+)', task_id, re.IGNORECASE)
+        if task_number:
+            record_queryset = record_queryset.filter(task_id=int(task_number.group(1)))
+        else:
+            record_queryset = record_queryset.none()
     if amr_id:
         record_queryset = record_queryset.filter(task__amr_id=amr_id)
     records = record_queryset.order_by('record_time', 'task_record_id')
