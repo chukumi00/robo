@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+
 from .models import AMR, Task
 
 
@@ -32,4 +33,4 @@ class DashboardTests(TestCase):
 		self.assertContains(response, 'AMR-001')
 		self.assertContains(response, 'AMR-002')
 
-# Create your tests here.
+
