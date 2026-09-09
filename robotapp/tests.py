@@ -80,6 +80,20 @@ class AmrLocationApiTests(TestCase):
 		self.assertContains(response, '"x": 10.0')
 		self.assertNotContains(response, '"x": 90.0')
 
+	def test_task_record_list_filters_by_displayed_task_number(self):
+		TaskRecord.objects.create(
+			task=self.task, x_coord=15, y_coord=25, z_coord=0,
+			record_time=timezone.now(), task_status=self.task.status,
+		)
+
+		response = self.client.get(
+			reverse('robotapp:task_record_list'),
+			{'task_id': f'TASK-{self.task.task_id:04d}'},
+		)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, '"x": 15.0')
+
 	def test_task_record_list_uses_same_time_order_for_table_and_path(self):
 		older = TaskRecord.objects.create(
 			task=self.task, x_coord=1, y_coord=2, z_coord=0,

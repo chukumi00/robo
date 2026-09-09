@@ -33,7 +33,7 @@
     <div class="top"><div><div class="eyebrow">AI SMART WAREHOUSE / PATH &amp; LOCATION HISTORY</div><h1>경로 및 위치이력</h1><div class="muted">AMR이 창고 내부에서 이동한 경로 및 위치 이력을 조회합니다.</div></div><a class="secondary" href="{% url 'robotapp:index' %}">대시보드</a></div>
     <section class="card">
       <form class="filters" method="get">
-        <input type="text" name="task_id" placeholder="작업번호" value="{{ task_id }}">
+        <input type="text" name="task_id" placeholder="작업번호 (예: TASK-0001)" value="{{ task_id }}">
         <select name="amr_id" onchange="this.form.submit()"><option value="">전체 AMR</option>{% for amr in amrs %}<option value="{{ amr.amr_id }}" {% if amr_id == amr.amr_id|stringformat:'s' %}selected{% endif %}>AMR-{{ amr.amr_id|stringformat:'03d' }}</option>{% endfor %}</select>
         <button type="submit">조회</button>
       </form>
