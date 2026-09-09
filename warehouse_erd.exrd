@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eXERD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0" targetDatabase="SQLite">
+  <database name="db.sqlite3" type="SQLite"/>
+  <tables>
+    <table id="t_auth_group" name="auth_group" logical-name="사용자 그룹" rows="0">
+      <columns>
+        <column id="c_auth_group_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_auth_group_name" name="name" logical-name="이름" type="varchar(150)" not-null="true"/>
+      </columns>
+      <primary-key name="PK_auth_group">
+        <column-ref id="c_auth_group_id"/>
+      </primary-key>
+    </table>
+    <table id="t_auth_group_permissions" name="auth_group_permissions" logical-name="그룹-권한 매핑" rows="0">
+      <columns>
+        <column id="c_auth_group_permissions_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_auth_group_permissions_group_id" name="group_id" logical-name="그룹 ID" type="INTEGER" not-null="true"/>
+        <column id="c_auth_group_permissions_permission_id" name="permission_id" logical-name="권한 ID" type="INTEGER" not-null="true"/>
+      </columns>
+      <primary-key name="PK_auth_group_permissions">
+        <column-ref id="c_auth_group_permissions_id"/>
+      </primary-key>
+    </table>
+    <table id="t_auth_permission" name="auth_permission" logical-name="권한 정보" rows="88">
+      <columns>
+        <column id="c_auth_permission_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_auth_permission_content_type_id" name="content_type_id" logical-name="컨텐츠 타입 ID" type="INTEGER" not-null="true"/>
+        <column id="c_auth_permission_codename" name="codename" logical-name="권한 코드명" type="varchar(100)" not-null="true"/>
+        <column id="c_auth_permission_name" name="name" logical-name="이름" type="varchar(255)" not-null="true"/>
+      </columns>
+      <primary-key name="PK_auth_permission">
+        <column-ref id="c_auth_permission_id"/>
+      </primary-key>
+    </table>
+    <table id="t_auth_user" name="auth_user" logical-name="사용자 계정" rows="0">
+      <columns>
+        <column id="c_auth_user_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_auth_user_password" name="password" logical-name="비밀번호" type="varchar(128)" not-null="true"/>
+        <column id="c_auth_user_last_login" name="last_login" logical-name="최근 로그인 일시" type="datetime" not-null="false"/>
+        <column id="c_auth_user_is_superuser" name="is_superuser" logical-name="슈퍼유저 여부" type="bool" not-null="true"/>
+        <column id="c_auth_user_username" name="username" logical-name="사용자 아이디" type="varchar(150)" not-null="true"/>
+        <column id="c_auth_user_last_name" name="last_name" logical-name="성" type="varchar(150)" not-null="true"/>
+        <column id="c_auth_user_email" name="email" logical-name="이메일 주소" type="varchar(254)" not-null="true"/>
+        <column id="c_auth_user_is_staff" name="is_staff" logical-name="관리자 여부" type="bool" not-null="true"/>
+        <column id="c_auth_user_is_active" name="is_active" logical-name="활성 여부" type="bool" not-null="true"/>
+        <column id="c_auth_user_date_joined" name="date_joined" logical-name="가입 일시" type="datetime" not-null="true"/>
+        <column id="c_auth_user_first_name" name="first_name" logical-name="이름" type="varchar(150)" not-null="true"/>
+      </columns>
+      <primary-key name="PK_auth_user">
+        <column-ref id="c_auth_user_id"/>
+      </primary-key>
+    </table>
+    <table id="t_auth_user_groups" name="auth_user_groups" logical-name="사용자-그룹 매핑" rows="0">
+      <columns>
+        <column id="c_auth_user_groups_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_auth_user_groups_user_id" name="user_id" logical-name="사용자 ID" type="INTEGER" not-null="true"/>
+        <column id="c_auth_user_groups_group_id" name="group_id" logical-name="그룹 ID" type="INTEGER" not-null="true"/>
+      </columns>
+      <primary-key name="PK_auth_user_groups">
+        <column-ref id="c_auth_user_groups_id"/>
+      </primary-key>
+    </table>
+    <table id="t_auth_user_user_permissions" name="auth_user_user_permissions" logical-name="사용자-권한 매핑" rows="0">
+      <columns>
+        <column id="c_auth_user_user_permissions_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_auth_user_user_permissions_user_id" name="user_id" logical-name="사용자 ID" type="INTEGER" not-null="true"/>
+        <column id="c_auth_user_user_permissions_permission_id" name="permission_id" logical-name="권한 ID" type="INTEGER" not-null="true"/>
+      </columns>
+      <primary-key name="PK_auth_user_user_permissions">
+        <column-ref id="c_auth_user_user_permissions_id"/>
+      </primary-key>
+    </table>
+    <table id="t_django_admin_log" name="django_admin_log" logical-name="관리자 로그" rows="0">
+      <columns>
+        <column id="c_django_admin_log_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_django_admin_log_object_id" name="object_id" logical-name="대상 객체 ID" type="TEXT" not-null="false"/>
+        <column id="c_django_admin_log_object_repr" name="object_repr" logical-name="대상 객체 표현" type="varchar(200)" not-null="true"/>
+        <column id="c_django_admin_log_action_flag" name="action_flag" logical-name="액션 플래그" type="smallint unsigned" not-null="true"/>
+        <column id="c_django_admin_log_change_message" name="change_message" logical-name="변경 내역 메시지" type="TEXT" not-null="true"/>
+        <column id="c_django_admin_log_content_type_id" name="content_type_id" logical-name="컨텐츠 타입 ID" type="INTEGER" not-null="false"/>
+        <column id="c_django_admin_log_user_id" name="user_id" logical-name="사용자 ID" type="INTEGER" not-null="true"/>
+        <column id="c_django_admin_log_action_time" name="action_time" logical-name="액션 수행 일시" type="datetime" not-null="true"/>
+      </columns>
+      <primary-key name="PK_django_admin_log">
+        <column-ref id="c_django_admin_log_id"/>
+      </primary-key>
+    </table>
+    <table id="t_django_content_type" name="django_content_type" logical-name="컨텐츠 타입" rows="22">
+      <columns>
+        <column id="c_django_content_type_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_django_content_type_app_label" name="app_label" logical-name="앱 라벨" type="varchar(100)" not-null="true"/>
+        <column id="c_django_content_type_model" name="model" logical-name="모델명" type="varchar(100)" not-null="true"/>
+      </columns>
+      <primary-key name="PK_django_content_type">
+        <column-ref id="c_django_content_type_id"/>
+      </primary-key>
+    </table>
+    <table id="t_django_migrations" name="django_migrations" logical-name="마이그레이션 이력" rows="27">
+      <columns>
+        <column id="c_django_migrations_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_django_migrations_app" name="app" logical-name="앱 이름" type="varchar(255)" not-null="true"/>
+        <column id="c_django_migrations_name" name="name" logical-name="이름" type="varchar(255)" not-null="true"/>
+        <column id="c_django_migrations_applied" name="applied" logical-name="적용 일시" type="datetime" not-null="true"/>
+      </columns>
+      <primary-key name="PK_django_migrations">
+        <column-ref id="c_django_migrations_id"/>
+      </primary-key>
+    </table>
+    <table id="t_django_session" name="django_session" logical-name="세션 정보" rows="4">
+      <columns>
+        <column id="c_django_session_session_key" name="session_key" logical-name="세션 키" type="varchar(40)" not-null="true" primary-key="true"/>
+        <column id="c_django_session_session_data" name="session_data" logical-name="세션 데이터" type="TEXT" not-null="true"/>
+        <column id="c_django_session_expire_date" name="expire_date" logical-name="만료 일시" type="datetime" not-null="true"/>
+      </columns>
+      <primary-key name="PK_django_session">
+        <column-ref id="c_django_session_session_key"/>
+      </primary-key>
+    </table>
+    <table id="t_robotapp_address" name="robotapp_address" logical-name="주소록 정보" rows="2">
+      <columns>
+        <column id="c_robotapp_address_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_robotapp_address_name" name="name" logical-name="이름" type="varchar(200)" not-null="true"/>
+        <column id="c_robotapp_address_addr" name="addr" logical-name="상세 주소" type="TEXT" not-null="true"/>
+        <column id="c_robotapp_address_rdate" name="rdate" logical-name="등록 일시" type="datetime" not-null="true"/>
+      </columns>
+      <primary-key name="PK_robotapp_address">
+        <column-ref id="c_robotapp_address_id"/>
+      </primary-key>
+    </table>
+    <table id="t_robotapp_amr" name="robotapp_amr" logical-name="AMR 로봇 정보" rows="4">
+      <columns>
+        <column id="c_robotapp_amr_AMR_ID" name="AMR_ID" logical-name="AMR 로봇 ID" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_robotapp_amr_ROBOT_STATE" name="ROBOT_STATE" logical-name="로봇 물리 상태" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_amr_OPERATION_STATE" name="OPERATION_STATE" logical-name="로봇 운행 상태" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_amr_BATTERY" name="BATTERY" logical-name="배터리 잔량 (%)" type="REAL" not-null="true"/>
+        <column id="c_robotapp_amr_LOCATION_ID" name="LOCATION_ID" logical-name="보관 위치 ID" type="INTEGER" not-null="false"/>
+      </columns>
+      <primary-key name="PK_robotapp_amr">
+        <column-ref id="c_robotapp_amr_AMR_ID"/>
+      </primary-key>
+    </table>
+    <table id="t_robotapp_inventory" name="robotapp_inventory" logical-name="재고 정보" rows="3">
+      <columns>
+        <column id="c_robotapp_inventory_INVENTORY_ID" name="INVENTORY_ID" logical-name="재고 ID" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_robotapp_inventory_CUR_ITEM_NUM" name="CUR_ITEM_NUM" logical-name="현재 재고 수량" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_inventory_MIN_ITEM_NUM" name="MIN_ITEM_NUM" logical-name="최소 안전 재고 수량" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_inventory_ITEM_ID" name="ITEM_ID" logical-name="물품 ID" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_inventory_LOCATION_ID" name="LOCATION_ID" logical-name="보관 위치 ID" type="INTEGER" not-null="true"/>
+      </columns>
+      <primary-key name="PK_robotapp_inventory">
+        <column-ref id="c_robotapp_inventory_INVENTORY_ID"/>
+      </primary-key>
+    </table>
+    <table id="t_robotapp_item" name="robotapp_item" logical-name="물품 정보" rows="3">
+      <columns>
+        <column id="c_robotapp_item_ITEM_ID" name="ITEM_ID" logical-name="물품 ID" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_robotapp_item_NAME" name="NAME" logical-name="구역명 / 물품명" type="varchar(50)" not-null="true"/>
+        <column id="c_robotapp_item_WIDTH" name="WIDTH" logical-name="가로 크기 (m)" type="REAL" not-null="true"/>
+        <column id="c_robotapp_item_LENGTH" name="LENGTH" logical-name="세로/길이 (m)" type="REAL" not-null="true"/>
+        <column id="c_robotapp_item_HEIGHT" name="HEIGHT" logical-name="높이 (m)" type="REAL" not-null="true"/>
+        <column id="c_robotapp_item_CLASS" name="CLASS" logical-name="물품 분류" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_item_INCOMING_DATE" name="INCOMING_DATE" logical-name="입고 일시" type="datetime" not-null="true"/>
+        <column id="c_robotapp_item_LOCATION_ID" name="LOCATION_ID" logical-name="보관 위치 ID" type="INTEGER" not-null="false"/>
+      </columns>
+      <primary-key name="PK_robotapp_item">
+        <column-ref id="c_robotapp_item_ITEM_ID"/>
+      </primary-key>
+    </table>
+    <table id="t_robotapp_location" name="robotapp_location" logical-name="보관 위치 정보" rows="4">
+      <columns>
+        <column id="c_robotapp_location_LOCATION_ID" name="LOCATION_ID" logical-name="보관 위치 ID" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_robotapp_location_LOCATION_CODE" name="LOCATION_CODE" logical-name="로케이션 코드" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_location_X_COORD" name="X_COORD" logical-name="X 좌표" type="REAL" not-null="true"/>
+        <column id="c_robotapp_location_Y_COORD" name="Y_COORD" logical-name="Y 좌표" type="REAL" not-null="true"/>
+        <column id="c_robotapp_location_Z_COORD" name="Z_COORD" logical-name="Z 좌표" type="REAL" not-null="true"/>
+        <column id="c_robotapp_location_STATE" name="STATE" logical-name="상태 코드" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_location_MAX_STORAGE" name="MAX_STORAGE" logical-name="최대 적재량" type="REAL" not-null="true"/>
+        <column id="c_robotapp_location_CUR_STORAGE" name="CUR_STORAGE" logical-name="현재 적재량" type="REAL" not-null="true"/>
+        <column id="c_robotapp_location_ZONE_ID" name="ZONE_ID" logical-name="구역 ID" type="INTEGER" not-null="true"/>
+      </columns>
+      <primary-key name="PK_robotapp_location">
+        <column-ref id="c_robotapp_location_LOCATION_ID"/>
+      </primary-key>
+    </table>
+    <table id="t_robotapp_member" name="robotapp_member" logical-name="회원(관리자) 정보" rows="2">
+      <columns>
+        <column id="c_robotapp_member_email" name="email" logical-name="이메일 주소" type="varchar(254)" not-null="true" primary-key="true"/>
+        <column id="c_robotapp_member_name" name="name" logical-name="이름" type="varchar(30)" not-null="true"/>
+        <column id="c_robotapp_member_pwd" name="pwd" logical-name="비밀번호 해시" type="varchar(128)" not-null="true"/>
+        <column id="c_robotapp_member_phone" name="phone" logical-name="전화번호" type="varchar(20)" not-null="true"/>
+        <column id="c_robotapp_member_rdate" name="rdate" logical-name="등록 일시" type="datetime" not-null="true"/>
+        <column id="c_robotapp_member_udate" name="udate" logical-name="수정 일시" type="datetime" not-null="true"/>
+      </columns>
+      <primary-key name="PK_robotapp_member">
+        <column-ref id="c_robotapp_member_email"/>
+      </primary-key>
+    </table>
+    <table id="t_robotapp_order" name="robotapp_order" logical-name="주문/입출고 정보" rows="5">
+      <columns>
+        <column id="c_robotapp_order_ORDER_ID" name="ORDER_ID" logical-name="주문 ID" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_robotapp_order_TYPE" name="TYPE" logical-name="주문 유형 (1:입고, 2:출고)" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_order_REQ_TIME" name="REQ_TIME" logical-name="요청 일시" type="datetime" not-null="true"/>
+        <column id="c_robotapp_order_END_TIME" name="END_TIME" logical-name="종료 일시" type="datetime" not-null="false"/>
+        <column id="c_robotapp_order_DUE_TIME" name="DUE_TIME" logical-name="만료/납기 일시" type="datetime" not-null="true"/>
+        <column id="c_robotapp_order_PRIORITY" name="PRIORITY" logical-name="우선순위 (1:일반, 2:긴급)" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_order_STATUS" name="STATUS" logical-name="주문/작업 상태" type="INTEGER" not-null="true"/>
+      </columns>
+      <primary-key name="PK_robotapp_order">
+        <column-ref id="c_robotapp_order_ORDER_ID"/>
+      </primary-key>
+    </table>
+    <table id="t_robotapp_order_detail" name="robotapp_order_detail" logical-name="주문 상세 정보" rows="5">
+      <columns>
+        <column id="c_robotapp_order_detail_ORDER_DETAIL_ID" name="ORDER_DETAIL_ID" logical-name="주문 상세 ID" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_robotapp_order_detail_ITEM_NUM" name="ITEM_NUM" logical-name="주문 물품 수량" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_order_detail_ITEM_ID" name="ITEM_ID" logical-name="물품 ID" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_order_detail_ORDER_ID" name="ORDER_ID" logical-name="주문 ID" type="INTEGER" not-null="true"/>
+      </columns>
+      <primary-key name="PK_robotapp_order_detail">
+        <column-ref id="c_robotapp_order_detail_ORDER_DETAIL_ID"/>
+      </primary-key>
+    </table>
+    <table id="t_robotapp_order_history" name="robotapp_order_history" logical-name="주문 이력 정보" rows="2">
+      <columns>
+        <column id="c_robotapp_order_history_ORDER_HISTORY_ID" name="ORDER_HISTORY_ID" logical-name="주문 변경 이력 ID" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_robotapp_order_history_PRE_STATE" name="PRE_STATE" logical-name="변경 전 상태" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_order_history_CHANGE_STATE" name="CHANGE_STATE" logical-name="변경 후 상태" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_order_history_STATUS" name="STATUS" logical-name="주문/작업 상태" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_order_history_ORDER_DATE" name="ORDER_DATE" logical-name="상태 변경 일시" type="datetime" not-null="true"/>
+        <column id="c_robotapp_order_history_ORDER_ID" name="ORDER_ID" logical-name="주문 ID" type="INTEGER" not-null="true"/>
+      </columns>
+      <primary-key name="PK_robotapp_order_history">
+        <column-ref id="c_robotapp_order_history_ORDER_HISTORY_ID"/>
+      </primary-key>
+    </table>
+    <table id="t_robotapp_task" name="robotapp_task" logical-name="AMR 작업 지시 정보" rows="5">
+      <columns>
+        <column id="c_robotapp_task_TASK_ID" name="TASK_ID" logical-name="작업 ID" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_robotapp_task_TASK_TIME" name="TASK_TIME" logical-name="작업 생성 일시" type="datetime" not-null="true"/>
+        <column id="c_robotapp_task_PRIORITY" name="PRIORITY" logical-name="우선순위 (1:일반, 2:긴급)" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_task_STATUS" name="STATUS" logical-name="주문/작업 상태" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_task_START_TIME" name="START_TIME" logical-name="작업 시작 일시" type="datetime" not-null="false"/>
+        <column id="c_robotapp_task_END_TIME" name="END_TIME" logical-name="종료 일시" type="datetime" not-null="false"/>
+        <column id="c_robotapp_task_AMR_ID" name="AMR_ID" logical-name="AMR 로봇 ID" type="INTEGER" not-null="false"/>
+        <column id="c_robotapp_task_END_LOCATION_ID" name="END_LOCATION_ID" logical-name="도착 위치 ID" type="INTEGER" not-null="false"/>
+        <column id="c_robotapp_task_ITEM_ID" name="ITEM_ID" logical-name="물품 ID" type="INTEGER" not-null="false"/>
+        <column id="c_robotapp_task_ORDER_ID" name="ORDER_ID" logical-name="주문 ID" type="INTEGER" not-null="false"/>
+        <column id="c_robotapp_task_START_LOCATION_ID" name="START_LOCATION_ID" logical-name="출발 위치 ID" type="INTEGER" not-null="false"/>
+      </columns>
+      <primary-key name="PK_robotapp_task">
+        <column-ref id="c_robotapp_task_TASK_ID"/>
+      </primary-key>
+    </table>
+    <table id="t_robotapp_task_record" name="robotapp_task_record" logical-name="작업 수행 경로 이력" rows="12">
+      <columns>
+        <column id="c_robotapp_task_record_TASK_RECORD_ID" name="TASK_RECORD_ID" logical-name="작업 기록 ID" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_robotapp_task_record_X_COORD" name="X_COORD" logical-name="X 좌표" type="REAL" not-null="true"/>
+        <column id="c_robotapp_task_record_Y_COORD" name="Y_COORD" logical-name="Y 좌표" type="REAL" not-null="true"/>
+        <column id="c_robotapp_task_record_Z_COORD" name="Z_COORD" logical-name="Z 좌표" type="REAL" not-null="true"/>
+        <column id="c_robotapp_task_record_RECORD_TIME" name="RECORD_TIME" logical-name="기록 일시" type="datetime" not-null="true"/>
+        <column id="c_robotapp_task_record_TASK_STATUS" name="TASK_STATUS" logical-name="기록 시점 작업 상태" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_task_record_TASK_ID" name="TASK_ID" logical-name="작업 ID" type="INTEGER" not-null="true"/>
+      </columns>
+      <primary-key name="PK_robotapp_task_record">
+        <column-ref id="c_robotapp_task_record_TASK_RECORD_ID"/>
+      </primary-key>
+    </table>
+    <table id="t_robotapp_zone" name="robotapp_zone" logical-name="구역 정보" rows="2">
+      <columns>
+        <column id="c_robotapp_zone_ZONE_ID" name="ZONE_ID" logical-name="구역 ID" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_robotapp_zone_NAME" name="NAME" logical-name="구역명 / 물품명" type="varchar(50)" not-null="true"/>
+        <column id="c_robotapp_zone_STATE" name="STATE" logical-name="상태 코드" type="INTEGER" not-null="true"/>
+        <column id="c_robotapp_zone_ORG_X" name="ORG_X" logical-name="원점 X좌표 (m)" type="REAL" not-null="true"/>
+        <column id="c_robotapp_zone_ORG_Y" name="ORG_Y" logical-name="원점 Y좌표 (m)" type="REAL" not-null="true"/>
+        <column id="c_robotapp_zone_ORG_Z" name="ORG_Z" logical-name="원점 Z좌표 (m)" type="REAL" not-null="true"/>
+        <column id="c_robotapp_zone_WIDTH" name="WIDTH" logical-name="가로 크기 (m)" type="REAL" not-null="true"/>
+        <column id="c_robotapp_zone_LENGTH" name="LENGTH" logical-name="세로/길이 (m)" type="REAL" not-null="true"/>
+        <column id="c_robotapp_zone_HEIGHT" name="HEIGHT" logical-name="높이 (m)" type="REAL" not-null="true"/>
+      </columns>
+      <primary-key name="PK_robotapp_zone">
+        <column-ref id="c_robotapp_zone_ZONE_ID"/>
+      </primary-key>
+    </table>
+    <table id="t_soosapp_address" name="soosapp_address" logical-name="SOOS 주소록 정보" rows="9">
+      <columns>
+        <column id="c_soosapp_address_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_soosapp_address_name" name="name" logical-name="이름" type="varchar(200)" not-null="true"/>
+        <column id="c_soosapp_address_addr" name="addr" logical-name="상세 주소" type="TEXT" not-null="true"/>
+        <column id="c_soosapp_address_rdate" name="rdate" logical-name="등록 일시" type="datetime" not-null="true"/>
+      </columns>
+      <primary-key name="PK_soosapp_address">
+        <column-ref id="c_soosapp_address_id"/>
+      </primary-key>
+    </table>
+    <table id="t_soosapp_board" name="soosapp_board" logical-name="게시판 정보" rows="0">
+      <columns>
+        <column id="c_soosapp_board_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_soosapp_board_b_writer" name="b_writer" logical-name="작성자" type="varchar(14)" not-null="true"/>
+        <column id="c_soosapp_board_b_email" name="b_email" logical-name="작성자 이메일" type="varchar(50)" not-null="true"/>
+        <column id="c_soosapp_board_b_subject" name="b_subject" logical-name="게시글 제목" type="varchar(50)" not-null="true"/>
+        <column id="c_soosapp_board_b_date" name="b_date" logical-name="작성 일시" type="datetime" not-null="true"/>
+        <column id="c_soosapp_board_b_contents" name="b_contents" logical-name="게시글 내용" type="varchar(50)" not-null="true"/>
+        <column id="c_soosapp_board_b_file" name="b_file" logical-name="첨부파일" type="varchar(255)" not-null="true"/>
+        <column id="c_soosapp_board_b_orgfile" name="b_orgfile" logical-name="원본 파일명" type="varchar(255)" not-null="true"/>
+        <column id="c_soosapp_board_b_filesize" name="b_filesize" logical-name="파일 크기" type="INTEGER" not-null="true"/>
+      </columns>
+      <primary-key name="PK_soosapp_board">
+        <column-ref id="c_soosapp_board_id"/>
+      </primary-key>
+    </table>
+    <table id="t_soosapp_member" name="soosapp_member" logical-name="SOOS 회원 정보" rows="2">
+      <columns>
+        <column id="c_soosapp_member_email" name="email" logical-name="이메일 주소" type="varchar(254)" not-null="true" primary-key="true"/>
+        <column id="c_soosapp_member_name" name="name" logical-name="이름" type="varchar(30)" not-null="true"/>
+        <column id="c_soosapp_member_pwd" name="pwd" logical-name="비밀번호 해시" type="varchar(128)" not-null="true"/>
+        <column id="c_soosapp_member_phone" name="phone" logical-name="전화번호" type="varchar(20)" not-null="true"/>
+        <column id="c_soosapp_member_rdate" name="rdate" logical-name="등록 일시" type="datetime" not-null="true"/>
+        <column id="c_soosapp_member_udate" name="udate" logical-name="수정 일시" type="datetime" not-null="true"/>
+      </columns>
+      <primary-key name="PK_soosapp_member">
+        <column-ref id="c_soosapp_member_email"/>
+      </primary-key>
+    </table>
+    <table id="t_soosapp_upload" name="soosapp_upload" logical-name="파일 업로드 정보" rows="0">
+      <columns>
+        <column id="c_soosapp_upload_id" name="id" logical-name="일련번호 (ID)" type="INTEGER" not-null="true" primary-key="true" auto-increment="true"/>
+        <column id="c_soosapp_upload_title" name="title" logical-name="제목" type="varchar(200)" not-null="true"/>
+        <column id="c_soosapp_upload_file" name="file" logical-name="저장 파일 경로" type="varchar(255)" not-null="true"/>
+        <column id="c_soosapp_upload_orgfile" name="orgfile" logical-name="원본파일명" type="varchar(255)" not-null="true"/>
+        <column id="c_soosapp_upload_filesize" name="filesize" logical-name="파일 크기 (bytes)" type="INTEGER" not-null="true"/>
+        <column id="c_soosapp_upload_rdate" name="rdate" logical-name="등록 일시" type="datetime" not-null="true"/>
+      </columns>
+      <primary-key name="PK_soosapp_upload">
+        <column-ref id="c_soosapp_upload_id"/>
+      </primary-key>
+    </table>
+  </tables>
+  <relationships>
+    <relationship id="rel_auth_group_permissions_permission_id_1" name="FK_auth_group_permissions_permission_id" parent-table="t_auth_permission" child-table="t_auth_group_permissions" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_auth_permission_id" child-column="c_auth_group_permissions_permission_id"/>
+    </relationship>
+    <relationship id="rel_auth_group_permissions_group_id_2" name="FK_auth_group_permissions_group_id" parent-table="t_auth_group" child-table="t_auth_group_permissions" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_auth_group_id" child-column="c_auth_group_permissions_group_id"/>
+    </relationship>
+    <relationship id="rel_auth_permission_content_type_id_3" name="FK_auth_permission_content_type_id" parent-table="t_django_content_type" child-table="t_auth_permission" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_django_content_type_id" child-column="c_auth_permission_content_type_id"/>
+    </relationship>
+    <relationship id="rel_auth_user_groups_group_id_4" name="FK_auth_user_groups_group_id" parent-table="t_auth_group" child-table="t_auth_user_groups" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_auth_group_id" child-column="c_auth_user_groups_group_id"/>
+    </relationship>
+    <relationship id="rel_auth_user_groups_user_id_5" name="FK_auth_user_groups_user_id" parent-table="t_auth_user" child-table="t_auth_user_groups" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_auth_user_id" child-column="c_auth_user_groups_user_id"/>
+    </relationship>
+    <relationship id="rel_auth_user_user_permissions_permission_id_6" name="FK_auth_user_user_permissions_permission_id" parent-table="t_auth_permission" child-table="t_auth_user_user_permissions" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_auth_permission_id" child-column="c_auth_user_user_permissions_permission_id"/>
+    </relationship>
+    <relationship id="rel_auth_user_user_permissions_user_id_7" name="FK_auth_user_user_permissions_user_id" parent-table="t_auth_user" child-table="t_auth_user_user_permissions" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_auth_user_id" child-column="c_auth_user_user_permissions_user_id"/>
+    </relationship>
+    <relationship id="rel_django_admin_log_user_id_8" name="FK_django_admin_log_user_id" parent-table="t_auth_user" child-table="t_django_admin_log" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_auth_user_id" child-column="c_django_admin_log_user_id"/>
+    </relationship>
+    <relationship id="rel_django_admin_log_content_type_id_9" name="FK_django_admin_log_content_type_id" parent-table="t_django_content_type" child-table="t_django_admin_log" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_django_content_type_id" child-column="c_django_admin_log_content_type_id"/>
+    </relationship>
+    <relationship id="rel_robotapp_amr_LOCATION_ID_10" name="FK_robotapp_amr_LOCATION_ID" parent-table="t_robotapp_location" child-table="t_robotapp_amr" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_location_LOCATION_ID" child-column="c_robotapp_amr_LOCATION_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_inventory_LOCATION_ID_11" name="FK_robotapp_inventory_LOCATION_ID" parent-table="t_robotapp_location" child-table="t_robotapp_inventory" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_location_LOCATION_ID" child-column="c_robotapp_inventory_LOCATION_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_inventory_ITEM_ID_12" name="FK_robotapp_inventory_ITEM_ID" parent-table="t_robotapp_item" child-table="t_robotapp_inventory" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_item_ITEM_ID" child-column="c_robotapp_inventory_ITEM_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_item_LOCATION_ID_13" name="FK_robotapp_item_LOCATION_ID" parent-table="t_robotapp_location" child-table="t_robotapp_item" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_location_LOCATION_ID" child-column="c_robotapp_item_LOCATION_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_location_ZONE_ID_14" name="FK_robotapp_location_ZONE_ID" parent-table="t_robotapp_zone" child-table="t_robotapp_location" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_zone_ZONE_ID" child-column="c_robotapp_location_ZONE_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_order_detail_ORDER_ID_15" name="FK_robotapp_order_detail_ORDER_ID" parent-table="t_robotapp_order" child-table="t_robotapp_order_detail" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_order_ORDER_ID" child-column="c_robotapp_order_detail_ORDER_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_order_detail_ITEM_ID_16" name="FK_robotapp_order_detail_ITEM_ID" parent-table="t_robotapp_item" child-table="t_robotapp_order_detail" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_item_ITEM_ID" child-column="c_robotapp_order_detail_ITEM_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_order_history_ORDER_ID_17" name="FK_robotapp_order_history_ORDER_ID" parent-table="t_robotapp_order" child-table="t_robotapp_order_history" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_order_ORDER_ID" child-column="c_robotapp_order_history_ORDER_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_task_START_LOCATION_ID_18" name="FK_robotapp_task_START_LOCATION_ID" parent-table="t_robotapp_location" child-table="t_robotapp_task" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_location_LOCATION_ID" child-column="c_robotapp_task_START_LOCATION_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_task_ORDER_ID_19" name="FK_robotapp_task_ORDER_ID" parent-table="t_robotapp_order" child-table="t_robotapp_task" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_order_ORDER_ID" child-column="c_robotapp_task_ORDER_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_task_ITEM_ID_20" name="FK_robotapp_task_ITEM_ID" parent-table="t_robotapp_item" child-table="t_robotapp_task" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_item_ITEM_ID" child-column="c_robotapp_task_ITEM_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_task_END_LOCATION_ID_21" name="FK_robotapp_task_END_LOCATION_ID" parent-table="t_robotapp_location" child-table="t_robotapp_task" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_location_LOCATION_ID" child-column="c_robotapp_task_END_LOCATION_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_task_AMR_ID_22" name="FK_robotapp_task_AMR_ID" parent-table="t_robotapp_amr" child-table="t_robotapp_task" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_amr_AMR_ID" child-column="c_robotapp_task_AMR_ID"/>
+    </relationship>
+    <relationship id="rel_robotapp_task_record_TASK_ID_23" name="FK_robotapp_task_record_TASK_ID" parent-table="t_robotapp_task" child-table="t_robotapp_task_record" cardinality="1:N" on-delete="NO ACTION" on-update="NO ACTION">
+      <reference parent-column="c_robotapp_task_TASK_ID" child-column="c_robotapp_task_record_TASK_ID"/>
+    </relationship>
+  </relationships>
+  <diagram id="diagram_main" name="AI Smart Warehouse &amp; Robot Control Physical ERD">
+    <shapes>
+      <table-shape table="t_auth_group" x="660" y="1060" width="220" height="110"/>
+      <table-shape table="t_auth_group_permissions" x="920" y="1060" width="240" height="130"/>
+      <table-shape table="t_auth_permission" x="1200" y="1060" width="250" height="150"/>
+      <table-shape table="t_auth_user" x="60" y="1060" width="260" height="280"/>
+      <table-shape table="t_auth_user_groups" x="380" y="1060" width="240" height="130"/>
+      <table-shape table="t_auth_user_user_permissions" x="380" y="1230" width="250" height="130"/>
+      <table-shape table="t_django_admin_log" x="60" y="1400" width="260" height="220"/>
+      <table-shape table="t_django_content_type" x="1200" y="1260" width="250" height="130"/>
+      <table-shape table="t_django_migrations" x="680" y="1400" width="250" height="130"/>
+      <table-shape table="t_django_session" x="380" y="1400" width="250" height="130"/>
+      <table-shape table="t_robotapp_address" x="1060" y="280" width="250" height="150"/>
+      <table-shape table="t_robotapp_amr" x="720" y="60" width="250" height="160"/>
+      <table-shape table="t_robotapp_inventory" x="720" y="280" width="250" height="160"/>
+      <table-shape table="t_robotapp_item" x="380" y="360" width="270" height="220"/>
+      <table-shape table="t_robotapp_location" x="380" y="60" width="270" height="240"/>
+      <table-shape table="t_robotapp_member" x="1060" y="60" width="250" height="170"/>
+      <table-shape table="t_robotapp_order" x="60" y="360" width="260" height="210"/>
+      <table-shape table="t_robotapp_order_detail" x="60" y="630" width="260" height="150"/>
+      <table-shape table="t_robotapp_order_history" x="60" y="830" width="260" height="170"/>
+      <table-shape table="t_robotapp_task" x="720" y="490" width="280" height="270"/>
+      <table-shape table="t_robotapp_task_record" x="1060" y="490" width="260" height="190"/>
+      <table-shape table="t_robotapp_zone" x="60" y="60" width="260" height="240"/>
+      <table-shape table="t_soosapp_address" x="1380" y="780" width="250" height="150"/>
+      <table-shape table="t_soosapp_board" x="1380" y="280" width="250" height="240"/>
+      <table-shape table="t_soosapp_member" x="1380" y="60" width="250" height="170"/>
+      <table-shape table="t_soosapp_upload" x="1380" y="570" width="250" height="170"/>
+    </shapes>
+    <connections>
+      <relationship-connection relationship="rel_auth_group_permissions_permission_id_1"/>
+      <relationship-connection relationship="rel_auth_group_permissions_group_id_2"/>
+      <relationship-connection relationship="rel_auth_permission_content_type_id_3"/>
+      <relationship-connection relationship="rel_auth_user_groups_group_id_4"/>
+      <relationship-connection relationship="rel_auth_user_groups_user_id_5"/>
+      <relationship-connection relationship="rel_auth_user_user_permissions_permission_id_6"/>
+      <relationship-connection relationship="rel_auth_user_user_permissions_user_id_7"/>
+      <relationship-connection relationship="rel_django_admin_log_user_id_8"/>
+      <relationship-connection relationship="rel_django_admin_log_content_type_id_9"/>
+      <relationship-connection relationship="rel_robotapp_amr_LOCATION_ID_10"/>
+      <relationship-connection relationship="rel_robotapp_inventory_LOCATION_ID_11"/>
+      <relationship-connection relationship="rel_robotapp_inventory_ITEM_ID_12"/>
+      <relationship-connection relationship="rel_robotapp_item_LOCATION_ID_13"/>
+      <relationship-connection relationship="rel_robotapp_location_ZONE_ID_14"/>
+      <relationship-connection relationship="rel_robotapp_order_detail_ORDER_ID_15"/>
+      <relationship-connection relationship="rel_robotapp_order_detail_ITEM_ID_16"/>
+      <relationship-connection relationship="rel_robotapp_order_history_ORDER_ID_17"/>
+      <relationship-connection relationship="rel_robotapp_task_START_LOCATION_ID_18"/>
+      <relationship-connection relationship="rel_robotapp_task_ORDER_ID_19"/>
+      <relationship-connection relationship="rel_robotapp_task_ITEM_ID_20"/>
+      <relationship-connection relationship="rel_robotapp_task_END_LOCATION_ID_21"/>
+      <relationship-connection relationship="rel_robotapp_task_AMR_ID_22"/>
+      <relationship-connection relationship="rel_robotapp_task_record_TASK_ID_23"/>
+    </connections>
+  </diagram>
+</eXERD>
