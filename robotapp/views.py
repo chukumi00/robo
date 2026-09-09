@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.template import loader
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.db.models import Count
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from .models import AMR, Address, Inventory, Item, Location, Order, OrderDetail, Member, Task, TaskRecord, Zone
@@ -63,11 +64,21 @@ def index(request):
         for zone in zones
     ]
     amrs = AMR.objects.select_related('location__zone').prefetch_related('tasks').order_by('amr_id')
+    completed_task_counts = dict(
+        Task.objects.filter(
+            status=Task.Status.COMPLETED,
+            end_time__date=today,
+            amr__isnull=False,
+        ).values('amr_id').annotate(count=Count('task_id')).values_list('amr_id', 'count')
+    )
+    max_completed_task_count = max(completed_task_counts.values(), default=0)
     robot_states = {0: '정지', 1: '정상'}
     operation_states = {0: '대기', 1: '운행 중', 2: '충전 중', 3: '작업 중', 4: '점검 중'}
     for amr in amrs:
         amr.robot_state_label = robot_states.get(amr.robot_state, '알 수 없음')
         amr.operation_state_label = operation_states.get(amr.operation_state, '알 수 없음')
+        amr.completed_task_count = completed_task_counts.get(amr.amr_id, 0)
+        amr.completed_task_height = round(amr.completed_task_count * 100 / max_completed_task_count) if max_completed_task_count else 0
         amr.current_task = next((task for task in amr.tasks.all() if task.status in [Task.Status.WAITING, Task.Status.IN_PROGRESS]), None)
     amr_data = [
         {
