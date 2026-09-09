@@ -187,9 +187,9 @@
       margin-top: 4px;
     }
 
-    .g1 { background: conic-gradient(var(--accent-blue) 85%, #1e293b 0); }
-    .g2 { background: conic-gradient(var(--accent-green) 92%, #1e293b 0); }
-    .g3 { background: conic-gradient(#8b5cf6 78%, #1e293b 0); }
+    .g1 { background: conic-gradient(var(--accent-blue) var(--gauge-percent), #1e293b 0); }
+    .g2 { background: conic-gradient(var(--accent-green) var(--gauge-percent), #1e293b 0); }
+    .g3 { background: conic-gradient(#8b5cf6 var(--gauge-percent), #1e293b 0); }
 
     .list-item {
       display: flex;
@@ -677,15 +677,15 @@
         <div class="card-title">창고 현황 요약</div>
         <div class="gauge-container">
           <div>
-            <div class="gauge g1"><div class="gauge-value">85%</div></div>
-            <div class="gauge-label">전체 가동률</div>
+            <div class="gauge g1" style="--gauge-percent: {{ overall_operation_percent }}%;"><div class="gauge-value">{{ overall_operation_percent }}%</div></div>
+            <div class="gauge-label">AMR 운영 가능률</div>
           </div>
           <div>
-            <div class="gauge g2"><div class="gauge-value">92%</div></div>
+            <div class="gauge g2" style="--gauge-percent: {{ amr_operation_percent }}%;"><div class="gauge-value">{{ amr_operation_percent }}%</div></div>
             <div class="gauge-label">AMR 가동률</div>
           </div>
           <div>
-            <div class="gauge g3"><div class="gauge-value">78%</div></div>
+            <div class="gauge g3" style="--gauge-percent: {{ inbound_outbound_processing_percent }}%;"><div class="gauge-value">{{ inbound_outbound_processing_percent }}%</div></div>
             <div class="gauge-label">입출고 처리율</div>
           </div>
         </div>

@@ -28,6 +28,15 @@ def index(request):
     template = loader.get_template('robotapp/index.html')
     today = timezone.now().date()
     today_orders = Order.objects.filter(req_time__date=today)
+    total_amrs = AMR.objects.count()
+    healthy_amrs = AMR.objects.filter(robot_state=1).count()
+    active_amrs = AMR.objects.filter(operation_state__in=[1, 3]).count()
+    today_order_count = today_orders.count()
+    completed_today_order_count = today_orders.filter(status=Order.Status.COMPLETED).count()
+
+    def percentage(value, total):
+        return round(value * 100 / total) if total else 0
+
     hourly_orders = []
     for start_hour in range(0, 24, 6):
         end_hour = start_hour + 6
@@ -97,9 +106,12 @@ def index(request):
     ]
     context = {
         'admin_name': request.session.get('login_ok_user_name', '관리자'),
+        'overall_operation_percent': percentage(healthy_amrs, total_amrs),
+        'amr_operation_percent': percentage(active_amrs, total_amrs),
+        'inbound_outbound_processing_percent': percentage(completed_today_order_count, today_order_count),
         'inbound_count': today_orders.filter(order_type=Order.OrderType.INBOUND).count(),
         'outbound_count': today_orders.filter(order_type=Order.OrderType.OUTBOUND).count(),
-        'order_count': today_orders.count(),
+        'order_count': today_order_count,
         'hourly_orders': hourly_orders,
         'total_stock': total_stock,
         'normal_count': normal_count,
