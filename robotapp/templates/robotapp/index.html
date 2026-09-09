@@ -891,13 +891,9 @@
       </div>
 
       <div class="card">
-        <div class="card-title">AMR 작업 효율 (오늘)</div>
+        <div class="card-title">AMR별 완료 작업 (오늘)</div>
         <div class="chart-box">
-          <div class="bar" style="height: 80%; background:#38bdf8;"><span class="bar-val">245</span></div>
-          <div class="bar" style="height: 60%; background:#38bdf8;"><span class="bar-val">198</span></div>
-          <div class="bar" style="height: 90%; background:#a855f7;"><span class="bar-val">276</span></div>
-          <div class="bar" style="height: 50%; background:#a855f7;"><span class="bar-val">165</span></div>
-          <div class="bar" style="height: 70%; background:#38bdf8;"><span class="bar-val">210</span></div>
+          {% for amr in amrs %}<div class="bar" style="height: {{ amr.completed_task_height }}%; background:#38bdf8;"><span class="bar-val">{{ amr.completed_task_count }}</span><span class="bar-label">AMR-{{ amr.amr_id|stringformat:'03d' }}</span></div>{% empty %}<div class="muted">등록된 AMR이 없습니다.</div>{% endfor %}
         </div>
       </div>
 
