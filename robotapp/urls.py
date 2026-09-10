@@ -5,6 +5,7 @@ app_name = 'robotapp'
 
 urlpatterns = [
     path('', views.index, name='index'), 
+    path('monitor/', views.realtime_monitor, name='realtime_monitor'),
     path('login/', views.login, name='login'),
     path('login/', views.login, name='login'),
     path('login/login_ok/', views.login_ok, name='login_ok'),
