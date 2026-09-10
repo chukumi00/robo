@@ -127,6 +127,11 @@ def index(request):
     }
     return HttpResponse(template.render(context, request))
 
+def digital_twin(request):
+    template = loader.get_template('robotapp/digital_twin.html')
+    context = {'admin_name': request.session.get('login_ok_user_name', '관리자')}
+    return HttpResponse(template.render(context, request))
+
 def login(request):
     template = loader.get_template('robotapp/login.html')
     return HttpResponse(template.render({}, request))
