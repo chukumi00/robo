@@ -642,8 +642,8 @@
     </div>
     <nav>
       <a href="#" class="nav-btn active">대시보드</a>
-      <a href="#" class="nav-btn">실시간 관제</a>
       <a href="{% url 'robotapp:digital_twin' %}" class="nav-btn">디지털 트윈</a>
+      <a href="{% url 'robotapp:realtime_monitor' %}" class="nav-btn">실시간 관제</a>
       <a href="{% url 'robotapp:amr_list' %}" class="nav-btn">AMR 관제</a>
       <a href="{% url 'robotapp:task_list' %}" class="nav-btn">작업 관리</a>
       <div class="nav-menu">
@@ -813,48 +813,26 @@
       <div class="card">
         <div class="card-title">
           실시간 작업 리스트
-          <span class="more">더보기 ></span>
+          <a class="more" href="{% url 'robotapp:task_list' %}">더보기 ></a>
         </div>
         <table>
           <thead>
             <tr>
               <th>작업 ID</th>
-              <th>작업 유형</th>
               <th>상태</th>
               <th>우선순위</th>
             </tr>
           </thead>
           <tbody>
+            {% for task in realtime_tasks %}
             <tr>
-              <td>TSK-0001</td>
-              <td>피킹</td>
-              <td><span style="color:var(--accent-green)">진행 중</span></td>
-              <td><span style="color:var(--accent-red)">● 높음</span></td>
+              <td>TSK-{{ task.task_id|stringformat:'04d' }}</td>
+              <td><span style="color:{{ task.status_color }}">{{ task.status_label }}</span></td>
+              <td><span style="color:{{ task.priority_color }}">● {{ task.priority_label }}</span></td>
             </tr>
-            <tr>
-              <td>TSK-0002</td>
-              <td>이동</td>
-              <td><span style="color:var(--accent-green)">진행 중</span></td>
-              <td><span style="color:var(--accent-orange)">● 보통</span></td>
-            </tr>
-            <tr>
-              <td>TSK-0003</td>
-              <td>적재</td>
-              <td><span style="color:var(--text-muted)">대기 중</span></td>
-              <td><span style="color:var(--accent-red)">● 높음</span></td>
-            </tr>
-            <tr>
-              <td>TSK-0004</td>
-              <td>피킹</td>
-              <td><span style="color:var(--accent-green)">진행 중</span></td>
-              <td><span style="color:var(--text-muted)">● 낮음</span></td>
-            </tr>
-            <tr>
-              <td>TSK-0005</td>
-              <td>이동</td>
-              <td><span style="color:var(--text-muted)">대기 중</span></td>
-              <td><span style="color:var(--accent-orange)">● 보통</span></td>
-            </tr>
+            {% empty %}
+            <tr><td colspan="3" style="color:var(--text-muted)">진행 중인 작업이 없습니다.</td></tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>
@@ -898,14 +876,13 @@
       </div>
 
       <div class="card">
-        <div class="card-title">작업 유형 비율 (오늘)</div>
+        <div class="card-title">작업 상태 비율 (오늘)</div>
         <div style="display: flex; gap: 12px; align-items: center; height: 100px;">
-          <div class="gauge g1" style="width:70px; height:70px;"><div class="gauge-value">100%</div></div>
+          <div class="gauge g1" style="width:70px; height:70px; --gauge-percent: 100%;"><div class="gauge-value">{{ today_task_count }}건</div></div>
           <div style="font-size: 10px; display:flex; flex-direction:column; gap:4px;">
-            <div><span class="status-dot bg-blue"></span> 피킹 45%</div>
-            <div><span class="status-dot bg-green"></span> 이동 30%</div>
-            <div><span class="status-dot bg-orange"></span> 적재 15%</div>
-            <div><span class="status-dot" style="background:#a855f7"></span> 충전 10%</div>
+            {% for status in task_status_distribution %}
+            <div><span class="status-dot {{ status.color_class }}"></span> {{ status.label }} {{ status.percent }}% ({{ status.count }}건)</div>
+            {% endfor %}
           </div>
         </div>
       </div>
