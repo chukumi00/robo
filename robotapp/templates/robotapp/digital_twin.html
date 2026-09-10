@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>통합 디지털 트윈 | AI SMART WAREHOUSE</title>
+  <style>
+    :root { --bg: #09111d; --panel: #111d2d; --panel-2: #172539; --line: #26384d; --text: #e7eef7; --muted: #8ea2b8; --cyan: #35c6e8; --green: #48d597; --amber: #f5b84b; --red: #ff6d78; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 1100px; background: var(--bg); color: var(--text); font-family: "Malgun Gothic", "Segoe UI", sans-serif; font-size: 13px; }
+    button, select { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+    .shell { min-height: 100vh; padding: 18px 22px 14px; background: radial-gradient(circle at 65% 30%, rgba(34, 102, 130, .12), transparent 35%), var(--bg); }
+    header { height: 54px; display: flex; align-items: center; gap: 36px; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; }
+    .brand strong { font-size: 16px; letter-spacing: .08em; }
+    .brand span, .user { color: var(--muted); font-size: 11px; }
+    nav { display: flex; align-items: center; gap: 6px; flex: 1; }
+    .nav-link { padding: 8px 11px; color: var(--muted); border-radius: 3px; font-size: 12px; }
+    .nav-link:hover, .nav-link.active { color: #fff; background: #117b9d; }
+    .user { white-space: nowrap; }
+    .page-head { display: flex; justify-content: space-between; align-items: end; padding: 26px 0 18px; }
+    .eyebrow { color: var(--cyan); font-size: 10px; letter-spacing: .16em; font-weight: 700; }
+    h1 { margin: 6px 0 5px; font-size: 25px; letter-spacing: -.03em; }
+    .page-head p { margin: 0; color: var(--muted); }
+    .head-actions { display: flex; gap: 8px; }
+    .action { padding: 9px 13px; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); background: var(--panel); cursor: pointer; }
+    .action.primary { color: #06131b; background: var(--cyan); border-color: var(--cyan); font-weight: 700; }
+    .workspace { display: grid; grid-template-columns: 208px minmax(570px, 1fr) 250px; gap: 12px; min-height: 590px; }
+    .panel { background: rgba(17, 29, 45, .92); border: 1px solid var(--line); border-radius: 4px; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; padding: 14px; border-bottom: 1px solid var(--line); font-weight: 700; }
+    .panel-head small { color: var(--muted); font-weight: 400; }
+    .left-panel, .right-panel { display: flex; flex-direction: column; gap: 12px; }
+    .layer-list { padding: 8px 0; }
+    .layer { display: flex; align-items: center; gap: 9px; width: 100%; padding: 10px 14px; border: 0; color: var(--text); background: transparent; text-align: left; cursor: pointer; }
+    .layer:hover { background: var(--panel-2); }
+    .layer.off { color: #62778d; }
+    .layer input { accent-color: var(--cyan); }
+    .swatch { width: 9px; height: 9px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 9px currentColor; }
+    .swatch.amr { background: var(--green); color: var(--green); }.swatch.task { background: var(--amber); color: var(--amber); }.swatch.stock { background: #bc83ff; color: #bc83ff; }.swatch.safe { background: var(--red); color: var(--red); }
+    .mini-section { padding: 14px; border-top: 1px solid var(--line); }
+    .mini-section h3 { margin: 0 0 12px; font-size: 11px; color: var(--muted); letter-spacing: .05em; }
+    .metric { display: flex; justify-content: space-between; margin: 10px 0; color: var(--muted); font-size: 12px; }.metric b { color: var(--text); }
+    .map-panel { position: relative; overflow: hidden; background: #0c1825; }
+    .map-toolbar { position: absolute; z-index: 3; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .map-toolbar span { padding: 7px 9px; background: rgba(9, 17, 29, .82); border: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+    .zoom { display: flex; gap: 4px; }.zoom button { width: 28px; height: 28px; border: 1px solid var(--line); color: var(--text); background: #15263a; cursor: pointer; }
+    .warehouse { position: absolute; inset: 70px 38px 38px; border: 1px solid #34506b; background: repeating-linear-gradient(90deg, transparent 0 72px, rgba(65, 113, 140, .13) 73px 74px), repeating-linear-gradient(0deg, transparent 0 58px, rgba(65, 113, 140, .13) 59px 60px), #0e2131; }
+    .warehouse:before, .warehouse:after { content: ""; position: absolute; background: rgba(53, 198, 232, .3); }.warehouse:before { top: 0; bottom: 0; left: 49%; width: 1px; }.warehouse:after { left: 0; right: 0; top: 53%; height: 1px; }
+    .zone { position: absolute; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid rgba(53, 198, 232, .54); background: rgba(24, 91, 111, .23); color: #b9eff8; font-size: 12px; }.zone small { margin-top: 5px; color: var(--muted); font-size: 10px; }.zone-a { left: 5%; top: 7%; width: 39%; height: 35%; }.zone-b { right: 5%; top: 7%; width: 39%; height: 35%; border-color: rgba(245, 184, 75, .6); background: rgba(116, 82, 29, .18); }.zone-c { left: 5%; bottom: 8%; width: 39%; height: 35%; border-color: rgba(72, 213, 151, .6); background: rgba(24, 101, 78, .18); }.zone-d { right: 5%; bottom: 8%; width: 39%; height: 35%; }
+    .route { position: absolute; left: 19%; top: 24%; width: 64%; height: 48%; border: 1px dashed rgba(72, 213, 151, .75); border-left-color: transparent; border-bottom-color: transparent; border-radius: 50%; transform: rotate(-18deg); }.route-label { position: absolute; right: 17%; top: 47%; color: var(--green); font-size: 10px; }
+    .robot { position: absolute; z-index: 2; display: grid; place-items: center; width: 28px; height: 28px; border: 2px solid #07161e; border-radius: 50%; color: #06131b; background: var(--green); box-shadow: 0 0 0 5px rgba(72, 213, 151, .16), 0 0 18px rgba(72, 213, 151, .8); font-size: 9px; font-weight: 800; }.robot.two { left: 67%; top: 60%; background: var(--amber); box-shadow: 0 0 0 5px rgba(245, 184, 75, .14), 0 0 18px rgba(245, 184, 75, .75); }.robot.one { left: 31%; top: 39%; }
+    .map-legend { position: absolute; bottom: 14px; left: 14px; display: flex; gap: 15px; padding: 8px 10px; background: rgba(9, 17, 29, .82); color: var(--muted); font-size: 10px; }.map-legend i { display: inline-block; width: 7px; height: 7px; margin-right: 4px; border-radius: 50%; background: var(--green); }.map-legend .warn { background: var(--amber); }.map-legend .zone-dot { background: var(--cyan); }
+    .selection { padding: 14px; }.object-name { display: flex; justify-content: space-between; align-items: center; margin-bottom: 17px; font-size: 15px; font-weight: 700; }.live { color: var(--green); font-size: 10px; font-weight: 400; }.detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(142, 162, 184, .14); color: var(--muted); }.detail-row strong { color: var(--text); font-weight: 500; }.battery { height: 5px; margin: 12px 0 16px; background: #26384d; border-radius: 4px; }.battery span { display: block; width: 78%; height: 100%; background: var(--green); border-radius: inherit; }
+    .alert { display: flex; gap: 9px; padding: 11px 14px; border-bottom: 1px solid rgba(142, 162, 184, .14); color: var(--muted); font-size: 11px; line-height: 1.45; }.alert b { color: var(--amber); font-weight: 500; }.alert:last-child { border-bottom: 0; }
+    .bottom-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; color: var(--muted); font-size: 11px; }.health { display: flex; gap: 18px; }.health span:before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: var(--green); }
+    @media (max-width: 1250px) { body { min-width: 960px; }.shell { padding-inline: 14px; }.workspace { grid-template-columns: 180px minmax(480px, 1fr) 220px; }.nav-link { padding-inline: 7px; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand"><strong>AI SMART WAREHOUSE</strong><span>스마트 물류창고 관제 시스템</span></div>
+      <nav>
+        <a class="nav-link" href="{% url 'robotapp:index' %}">대시보드</a>
+        <a class="nav-link" href="#">실시간 관제</a>
+        <a class="nav-link active" href="{% url 'robotapp:digital_twin' %}">디지털 트윈</a>
+        <a class="nav-link" href="{% url 'robotapp:amr_list' %}">AMR 관제</a>
+        <a class="nav-link" href="{% url 'robotapp:task_list' %}">작업 관리</a>
+        <a class="nav-link" href="{% url 'robotapp:inventory' %}">재고 관리</a>
+        <a class="nav-link" href="{% url 'robotapp:task_record_list' %}">이력 분석</a>
+      </nav>
+      <div class="user">● {{ admin_name }}　|　14:32:08</div>
+    </header>
+
+    <section class="page-head">
+      <div><div class="eyebrow">WAREHOUSE / INTEGRATED DIGITAL TWIN</div><h1>통합 디지털 트윈</h1><p>창고 공간 위에 설비, 재고, 작업 흐름을 한 화면으로 연결합니다.</p></div>
+      <div class="head-actions"><button class="action" type="button">↻ 새로고침</button><button class="action primary" type="button">공간 편집</button></div>
+    </section>
+
+    <main class="workspace">
+      <aside class="left-panel">
+        <section class="panel"><div class="panel-head">표시 레이어 <small>5개</small></div><div class="layer-list">
+          <label class="layer"><input type="checkbox" checked><i class="swatch"></i>구역 및 시설</label>
+          <label class="layer"><input type="checkbox" checked><i class="swatch amr"></i>AMR 위치</label>
+          <label class="layer"><input type="checkbox" checked><i class="swatch task"></i>작업 경로</label>
+          <label class="layer"><input type="checkbox" checked><i class="swatch stock"></i>재고 상태</label>
+          <label class="layer"><input type="checkbox" checked><i class="swatch safe"></i>안전 영역</label>
+        </div><div class="mini-section"><h3>표시 기준</h3><select style="width:100%;padding:8px;background:#0c1825;color:var(--text);border:1px solid var(--line);"><option>현재 운영 상태</option><option>재고 적재율</option><option>작업 진행 상태</option></select></div></section>
+        <section class="panel"><div class="panel-head">공간 요약</div><div class="mini-section"><div class="metric"><span>전체 구역</span><b>08</b></div><div class="metric"><span>사용 중 위치</span><b>142 / 180</b></div><div class="metric"><span>현재 적재율</span><b style="color:var(--cyan)">78.9%</b></div><div class="metric"><span>운영 중 AMR</span><b style="color:var(--green)">06 / 08</b></div></div></section>
+      </aside>
+
+      <section class="panel map-panel">
+        <div class="map-toolbar"><span>창고 전체　·　실시간</span><div class="zoom"><button type="button">−</button><button type="button">+</button><button type="button">⌖</button></div></div>
+        <div class="warehouse"><div class="zone zone-a">입고 구역<small>적재율 62% · 정상</small></div><div class="zone zone-b">보관 구역 A<small>적재율 91% · 주의</small></div><div class="zone zone-c">출고 구역<small>적재율 48% · 정상</small></div><div class="zone zone-d">보관 구역 B<small>적재율 76% · 정상</small></div><div class="route"></div><span class="route-label">TASK-002 이동 경로</span><div class="robot one">01</div><div class="robot two">04</div></div>
+        <div class="map-legend"><span><i class="zone-dot"></i>시설</span><span><i></i>운행 중</span><span><i class="warn"></i>주의</span><span>2D VIEW</span></div>
+      </section>
+
+      <aside class="right-panel">
+        <section class="panel"><div class="panel-head">선택 객체 <small>AMR-001</small></div><div class="selection"><div class="object-name">AMR-001 <span class="live">● 운행 중</span></div><div class="detail-row"><span>현재 위치</span><strong>보관 구역 A</strong></div><div class="detail-row"><span>수행 작업</span><strong>TASK-002</strong></div><div class="detail-row"><span>이동 방향</span><strong>동쪽 →</strong></div><div class="detail-row"><span>배터리</span><strong>78%</strong></div><div class="battery"><span></span></div><button class="action" style="width:100%" type="button">AMR 상세 보기</button></div></section>
+        <section class="panel"><div class="panel-head">공간 알림 <small style="color:var(--red)">3건</small></div><div class="alert"><b>주의</b><span>보관 구역 A 적재율이 90%를 초과했습니다.</span></div><div class="alert"><b>확인</b><span>AMR-004가 충전 스테이션으로 이동 중입니다.</span></div><div class="alert"><b>지연</b><span>출고 작업 TASK-006이 예정 시간보다 늦습니다.</span></div></section>
+      </aside>
+    </main>
+    <footer class="bottom-bar"><span>마지막 동기화　2026.09.10 14:32:08</span><div class="health"><span>시스템 정상</span><span>네트워크 정상</span><span>DB 연결 정상</span></div><span>Ver 1.0.0</span></footer>
+  </div>
+</body>
+</html>
