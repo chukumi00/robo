@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
 from django.template import loader
 from django.http import HttpResponseRedirect
@@ -33,9 +33,50 @@ def index(request):
     active_amrs = AMR.objects.filter(operation_state__in=[1, 3]).count()
     today_order_count = today_orders.count()
     completed_today_order_count = today_orders.filter(status=Order.Status.COMPLETED).count()
+    today_tasks = Task.objects.filter(task_time__date=today)
+    today_task_count = today_tasks.count()
+    realtime_tasks = Task.objects.filter(
+        status__in=[Task.Status.WAITING, Task.Status.IN_PROGRESS],
+    ).order_by('status', '-task_time')[:5]
 
     def percentage(value, total):
         return round(value * 100 / total) if total else 0
+
+    task_status_distribution = [
+        {
+            'label': label,
+            'count': today_tasks.filter(status=status).count(),
+            'percent': percentage(today_tasks.filter(status=status).count(), today_task_count),
+            'color_class': color_class,
+        }
+        for status, label, color_class in [
+            (Task.Status.WAITING, '대기', 'bg-blue'),
+            (Task.Status.IN_PROGRESS, '진행', 'bg-green'),
+            (Task.Status.COMPLETED, '완료', 'bg-orange'),
+            (Task.Status.CANCELLED, '취소', 'bg-purple'),
+        ]
+    ]
+    task_status_labels = {
+        Task.Status.WAITING: '대기',
+        Task.Status.IN_PROGRESS: '진행',
+    }
+    task_status_colors = {
+        Task.Status.WAITING: 'var(--text-muted)',
+        Task.Status.IN_PROGRESS: 'var(--accent-green)',
+    }
+    task_priority_labels = {
+        Task.Priority.NORMAL: '일반',
+        Task.Priority.URGENT: '긴급',
+    }
+    task_priority_colors = {
+        Task.Priority.NORMAL: 'var(--accent-orange)',
+        Task.Priority.URGENT: 'var(--accent-red)',
+    }
+    for task in realtime_tasks:
+        task.status_label = task_status_labels[task.status]
+        task.status_color = task_status_colors[task.status]
+        task.priority_label = task_priority_labels[task.priority]
+        task.priority_color = task_priority_colors[task.priority]
 
     hourly_orders = []
     for start_hour in range(0, 24, 6):
@@ -112,6 +153,9 @@ def index(request):
         'inbound_count': today_orders.filter(order_type=Order.OrderType.INBOUND).count(),
         'outbound_count': today_orders.filter(order_type=Order.OrderType.OUTBOUND).count(),
         'order_count': today_order_count,
+        'today_task_count': today_task_count,
+        'task_status_distribution': task_status_distribution,
+        'realtime_tasks': realtime_tasks,
         'hourly_orders': hourly_orders,
         'total_stock': total_stock,
         'normal_count': normal_count,
@@ -125,6 +169,74 @@ def index(request):
         'amrs': amrs,
         'amr_data': amr_data,
     }
+    return HttpResponse(template.render(context, request))
+
+def realtime_monitor(request):
+    now = timezone.now()
+    today = now.date()
+    active_statuses = [Task.Status.WAITING, Task.Status.IN_PROGRESS]
+    amrs = list(AMR.objects.select_related('location__zone').order_by('amr_id'))
+    active_tasks = list(
+        Task.objects.filter(status__in=active_statuses)
+        .select_related('amr', 'start_location__zone', 'end_location__zone')
+        .order_by('status', '-task_time')
+    )
+    active_tasks_by_amr = {task.amr_id: task for task in active_tasks if task.amr_id}
+    operation_labels = {0: '대기', 1: '운행 중', 2: '충전 중', 3: '작업 중', 4: '점검 중'}
+    operation_colors = {0: 'idle', 1: 'moving', 2: 'charging', 3: 'working', 4: 'inspection'}
+    for amr in amrs:
+        amr.current_task = active_tasks_by_amr.get(amr.amr_id)
+        amr.operation_label = operation_labels.get(amr.operation_state, '알 수 없음')
+        amr.operation_color = operation_colors.get(amr.operation_state, 'idle')
+    for task in active_tasks:
+        task.status_label = '대기' if task.status == Task.Status.WAITING else '진행'
+
+    alerts = []
+    for amr in amrs:
+        if amr.battery < 30:
+            alerts.append({'level': 'critical', 'message': f'AMR-{amr.amr_id:03d} 배터리 부족 ({amr.battery:.0f}%)'})
+        if not amr.location:
+            alerts.append({'level': 'warning', 'message': f'AMR-{amr.amr_id:03d} 위치 정보 없음'})
+    unassigned_task_count = sum(task.amr_id is None for task in active_tasks)
+    if unassigned_task_count:
+        alerts.append({'level': 'warning', 'message': f'미배정 활성 작업 {unassigned_task_count}건'})
+    delayed_task_count = sum(
+        task.status == Task.Status.IN_PROGRESS
+        and task.start_time is not None
+        and task.start_time < now - timedelta(minutes=30)
+        for task in active_tasks
+    )
+    if delayed_task_count:
+        alerts.append({'level': 'critical', 'message': f'30분 이상 진행 중인 작업 {delayed_task_count}건'})
+
+    amr_map_data = [
+        {
+            'id': amr.amr_id,
+            'battery': round(amr.battery),
+            'status': amr.operation_label,
+            'statusClass': amr.operation_color,
+            'taskId': amr.current_task.task_id if amr.current_task else None,
+            'zone': amr.location.zone.name if amr.location else '위치 미정',
+            'x': amr.location.x_coord if amr.location else None,
+            'y': amr.location.y_coord if amr.location else None,
+        }
+        for amr in amrs
+    ]
+    context = {
+        'amrs': amrs,
+        'active_tasks': active_tasks[:8],
+        'amr_map_data': amr_map_data,
+        'alerts': alerts,
+        'total_amr_count': len(amrs),
+        'moving_amr_count': sum(amr.operation_state == 1 for amr in amrs),
+        'working_amr_count': sum(amr.operation_state == 3 for amr in amrs),
+        'charging_amr_count': sum(amr.operation_state == 2 for amr in amrs),
+        'today_completed_task_count': Task.objects.filter(status=Task.Status.COMPLETED, end_time__date=today).count(),
+        'in_progress_task_count': sum(task.status == Task.Status.IN_PROGRESS for task in active_tasks),
+        'waiting_task_count': sum(task.status == Task.Status.WAITING for task in active_tasks),
+        'unassigned_task_count': unassigned_task_count,
+    }
+    template = loader.get_template('robotapp/realtime_monitor.html')
     return HttpResponse(template.render(context, request))
 
 def login(request):
